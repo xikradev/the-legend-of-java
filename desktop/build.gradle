@@ -1,0 +1,29 @@
+apply plugin: 'application'
+
+sourceSets.main.resources.srcDirs += [ rootProject.file('assets').path ]
+mainClassName = 'com.legendofjava.desktop.DesktopLauncher'
+eclipse.project.name = appName + "-desktop"
+
+sourceCompatibility = 21
+targetCompatibility = 21
+
+dependencies {
+    implementation project(':core')
+}
+
+jar {
+    archiveBaseName.set(appName)
+    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+    dependsOn configurations.runtimeClasspath
+    from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+    manifest {
+        attributes 'Main-Class': project.mainClassName
+    }
+}
+
+run {
+    ignoreExitValue = true
+    systemProperties System.getProperties()
+    // Optional: force X11 if wayland fails
+    // environment 'WAYLAND_DISPLAY', ''
+}
