@@ -12,6 +12,8 @@ public class Player {
     private Vector2 position;
     private Vector2 velocity;
     private final float speed = 100f; // pixels per second
+    
+    private boolean hasSword = false;
 
     private Texture spriteSheet;
 
@@ -116,7 +118,7 @@ public class Player {
             position.x += velocity.x * delta;
             position.y += velocity.y * delta;
 
-            if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) || Gdx.input.isKeyJustPressed(Input.Keys.Z)) {
+            if ((Gdx.input.isKeyJustPressed(Input.Keys.SPACE) || Gdx.input.isKeyJustPressed(Input.Keys.Z)) && hasSword) {
                 startAttack();
             } else if (velocity.x > 0) {
                 currentState = State.WALKING_RIGHT;
@@ -253,5 +255,17 @@ public class Player {
         if (spriteSheet != null) {
             spriteSheet.dispose();
         }
+    }
+
+    public boolean hasSword() {
+        return hasSword;
+    }
+
+    public void giveSword() {
+        this.hasSword = true;
+    }
+
+    public Vector2 getPosition() {
+        return position;
     }
 }
