@@ -18,12 +18,19 @@ public class Player {
     private Animation<TextureRegion> walkDown;
     private Animation<TextureRegion> walkRight;
     private Animation<TextureRegion> walkUp;
-    private Animation<TextureRegion> walkLeft; // Flipped version of right
+    private Animation<TextureRegion> walkLeft;
+
+    private Animation<TextureRegion> attackDown;
+    private Animation<TextureRegion> attackRight;
+    private Animation<TextureRegion> attackUp;
+    private Animation<TextureRegion> attackLeft;
 
     private float stateTime;
+    private State lastDirection = State.WALKING_DOWN;
 
     public enum State {
-        IDLE, WALKING_UP, WALKING_DOWN, WALKING_LEFT, WALKING_RIGHT
+        IDLE, WALKING_UP, WALKING_DOWN, WALKING_LEFT, WALKING_RIGHT,
+        ATTACKING_UP, ATTACKING_DOWN, ATTACKING_LEFT, ATTACKING_RIGHT
     }
 
     private State currentState;
@@ -72,38 +79,105 @@ public class Player {
         walkLeft = new Animation<>(frameDuration, left1, left2);
         walkLeft.setPlayMode(Animation.PlayMode.LOOP);
 
+        // --- ATTACK ANIMATIONS ---
+        TextureRegion atkDown1 = new TextureRegion(spriteSheet, 0, 47, 16, 27);
+        TextureRegion atkDown2 = new TextureRegion(spriteSheet, 17, 47, 16, 27);
+        TextureRegion atkDown3 = new TextureRegion(spriteSheet, 34, 47, 16, 27);
+        TextureRegion atkDown4 = new TextureRegion(spriteSheet, 51, 47, 16, 27);
+
+        TextureRegion atkRight1 = new TextureRegion(spriteSheet, 0, 77, 16, 16);
+        TextureRegion atkRight2 = new TextureRegion(spriteSheet, 17, 77, 28, 16);
+        TextureRegion atkRight3 = new TextureRegion(spriteSheet, 46, 77, 24, 16);
+        TextureRegion atkRight4 = new TextureRegion(spriteSheet, 70, 77, 20, 16);
+
+        TextureRegion atkUp1 = new TextureRegion(spriteSheet, 0, 97, 16, 28);
+        TextureRegion atkUp2 = new TextureRegion(spriteSheet, 17, 97, 16, 28);
+        TextureRegion atkUp3 = new TextureRegion(spriteSheet, 34, 97, 16, 28);
+        TextureRegion atkUp4 = new TextureRegion(spriteSheet, 51, 97, 16, 28);
+
+        TextureRegion atkLeft1 = new TextureRegion(atkRight1); atkLeft1.flip(true, false);
+        TextureRegion atkLeft2 = new TextureRegion(atkRight2); atkLeft2.flip(true, false);
+        TextureRegion atkLeft3 = new TextureRegion(atkRight3); atkLeft3.flip(true, false);
+        TextureRegion atkLeft4 = new TextureRegion(atkRight4); atkLeft4.flip(true, false);
+
+        float attackDuration = 0.08f;
+        attackDown = new Animation<>(attackDuration, atkDown1, atkDown2, atkDown3, atkDown4);
+        attackRight = new Animation<>(attackDuration, atkRight1, atkRight2, atkRight3, atkRight4);
+        attackUp = new Animation<>(attackDuration, atkUp1, atkUp2, atkUp3, atkUp4);
+        attackLeft = new Animation<>(attackDuration, atkLeft1, atkLeft2, atkLeft3, atkLeft4);
+
         currentFrame = down1; // Default looking down
     }
 
     public void update(float delta) {
         handleInput();
 
-        // Update position
-        position.x += velocity.x * delta;
-        position.y += velocity.y * delta;
+        if (!isAttacking()) {
+            position.x += velocity.x * delta;
+            position.y += velocity.y * delta;
 
-        // Determine state
-        if (velocity.x > 0) {
-            currentState = State.WALKING_RIGHT;
-        } else if (velocity.x < 0) {
-            currentState = State.WALKING_LEFT;
-        } else if (velocity.y > 0) {
-            currentState = State.WALKING_UP;
-        } else if (velocity.y < 0) {
-            currentState = State.WALKING_DOWN;
-        } else {
-            currentState = State.IDLE;
+            if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) || Gdx.input.isKeyJustPressed(Input.Keys.Z)) {
+                startAttack();
+            } else if (velocity.x > 0) {
+                currentState = State.WALKING_RIGHT;
+                lastDirection = State.WALKING_RIGHT;
+            } else if (velocity.x < 0) {
+                currentState = State.WALKING_LEFT;
+                lastDirection = State.WALKING_LEFT;
+            } else if (velocity.y > 0) {
+                currentState = State.WALKING_UP;
+                lastDirection = State.WALKING_UP;
+            } else if (velocity.y < 0) {
+                currentState = State.WALKING_DOWN;
+                lastDirection = State.WALKING_DOWN;
+            } else {
+                currentState = State.IDLE;
+            }
         }
 
-        // Animation state time
         if (currentState != previousState) {
             stateTime = 0;
-        } else if (currentState != State.IDLE) {
+        } else {
             stateTime += delta;
+        }
+
+        if (isAttacking()) {
+            Animation<TextureRegion> anim = getAttackAnimation();
+            if (anim.isAnimationFinished(stateTime)) {
+                currentState = State.IDLE;
+            }
         }
 
         previousState = currentState;
         updateFrame();
+    }
+
+    private boolean isAttacking() {
+        return currentState == State.ATTACKING_UP || currentState == State.ATTACKING_DOWN || 
+               currentState == State.ATTACKING_LEFT || currentState == State.ATTACKING_RIGHT;
+    }
+
+    private void startAttack() {
+        if (lastDirection == State.WALKING_UP) {
+            currentState = State.ATTACKING_UP;
+        } else if (lastDirection == State.WALKING_DOWN) {
+            currentState = State.ATTACKING_DOWN;
+        } else if (lastDirection == State.WALKING_RIGHT) {
+            currentState = State.ATTACKING_RIGHT;
+        } else if (lastDirection == State.WALKING_LEFT) {
+            currentState = State.ATTACKING_LEFT;
+        }
+        stateTime = 0;
+    }
+
+    private Animation<TextureRegion> getAttackAnimation() {
+        switch (currentState) {
+            case ATTACKING_UP: return attackUp;
+            case ATTACKING_DOWN: return attackDown;
+            case ATTACKING_RIGHT: return attackRight;
+            case ATTACKING_LEFT: return attackLeft;
+            default: return attackDown;
+        }
     }
 
     private void handleInput() {
@@ -134,15 +208,26 @@ public class Player {
             case WALKING_LEFT:
                 currentFrame = walkLeft.getKeyFrame(stateTime);
                 break;
+            case ATTACKING_UP:
+                currentFrame = attackUp.getKeyFrame(stateTime);
+                break;
+            case ATTACKING_DOWN:
+                currentFrame = attackDown.getKeyFrame(stateTime);
+                break;
+            case ATTACKING_RIGHT:
+                currentFrame = attackRight.getKeyFrame(stateTime);
+                break;
+            case ATTACKING_LEFT:
+                currentFrame = attackLeft.getKeyFrame(stateTime);
+                break;
             case IDLE:
-                // Keep the first frame of the last direction
-                if (previousState == State.WALKING_UP)
+                if (lastDirection == State.WALKING_UP)
                     currentFrame = walkUp.getKeyFrames()[0];
-                else if (previousState == State.WALKING_DOWN)
+                else if (lastDirection == State.WALKING_DOWN)
                     currentFrame = walkDown.getKeyFrames()[0];
-                else if (previousState == State.WALKING_RIGHT)
+                else if (lastDirection == State.WALKING_RIGHT)
                     currentFrame = walkRight.getKeyFrames()[0];
-                else if (previousState == State.WALKING_LEFT)
+                else if (lastDirection == State.WALKING_LEFT)
                     currentFrame = walkLeft.getKeyFrames()[0];
                 break;
         }
@@ -150,8 +235,17 @@ public class Player {
 
     public void render(SpriteBatch batch) {
         if (currentFrame != null) {
-            // Draw scaled down to 16x16 to fit the 400x240 screen properly
-            batch.draw(currentFrame, position.x, position.y, 16, 16);
+            float drawX = position.x;
+            float drawY = position.y;
+            
+            if (currentState == State.ATTACKING_LEFT) {
+                drawX -= (currentFrame.getRegionWidth() - 16);
+            }
+            if (currentState == State.ATTACKING_DOWN) {
+                drawY -= (currentFrame.getRegionHeight() - 16);
+            }
+            
+            batch.draw(currentFrame, drawX, drawY, currentFrame.getRegionWidth(), currentFrame.getRegionHeight());
         }
     }
 
