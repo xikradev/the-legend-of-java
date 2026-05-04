@@ -6,7 +6,9 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import java.util.List;
 
 public class Player {
     private Vector2 position;
@@ -111,12 +113,22 @@ public class Player {
         currentFrame = down1; // Default looking down
     }
 
-    public void update(float delta) {
+    public void update(float delta, List<Rectangle> collisionRects) {
         handleInput();
 
         if (!isAttacking()) {
+            float oldX = position.x;
+            float oldY = position.y;
+
             position.x += velocity.x * delta;
+            if (collides(collisionRects)) {
+                position.x = oldX;
+            }
+
             position.y += velocity.y * delta;
+            if (collides(collisionRects)) {
+                position.y = oldY;
+            }
 
             if ((Gdx.input.isKeyJustPressed(Input.Keys.SPACE) || Gdx.input.isKeyJustPressed(Input.Keys.Z)) && hasSword) {
                 startAttack();
@@ -157,6 +169,22 @@ public class Player {
     private boolean isAttacking() {
         return currentState == State.ATTACKING_UP || currentState == State.ATTACKING_DOWN || 
                currentState == State.ATTACKING_LEFT || currentState == State.ATTACKING_RIGHT;
+    }
+
+    public Rectangle getHitbox() {
+        // Hitbox menor, cobrindo apenas a parte dos pés do personagem
+        // para dar o efeito pseudo-3D comum em jogos do Zelda
+        return new Rectangle(position.x + 2, position.y, 12, 8);
+    }
+
+    private boolean collides(List<Rectangle> collisionRects) {
+        Rectangle playerRect = getHitbox();
+        for (Rectangle rect : collisionRects) {
+            if (playerRect.overlaps(rect)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void startAttack() {
