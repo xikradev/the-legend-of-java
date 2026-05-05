@@ -11,6 +11,7 @@ import com.legendofjava.core.entities.Item;
 import com.legendofjava.core.entities.Player;
 import com.legendofjava.core.entities.WoodenSword;
 import com.legendofjava.core.utils.Constants;
+import com.legendofjava.core.world.QuadrantManager;
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.Color;
@@ -35,11 +36,10 @@ public class GameScreen implements Screen {
 
     private TiledMap map;
     private OrthogonalTiledMapRenderer mapRenderer;
-    private List<Rectangle> collisionRects;
+    private QuadrantManager quadrantManager;
     private ShapeRenderer shapeRenderer;
 
     private Texture spriteSheet;
-    private List<Item> itemsOnMap;
 
     public GameScreen(LegendOfJavaGame game) {
         this.game = game;
@@ -48,7 +48,10 @@ public class GameScreen implements Screen {
         map = new TmxMapLoader().load("maps/zelda-map.tmx");
         mapRenderer = new OrthogonalTiledMapRenderer(map);
 
-        collisionRects = new ArrayList<>();
+        quadrantManager = new QuadrantManager();
+        quadrantManager.loadFromMap(map);
+
+        // Mantendo o cálculo da média para colocar o player próximo às primeiras colisões
         float cx = 0;
         float cy = 0;
         int count = 0;
@@ -56,7 +59,6 @@ public class GameScreen implements Screen {
             for (MapObject object : map.getLayers().get("colisoes").getObjects()) {
                 if (object instanceof RectangleMapObject) {
                     Rectangle r = ((RectangleMapObject) object).getRectangle();
-                    collisionRects.add(r);
                     cx += r.x + r.width / 2f;
                     cy += r.y + r.height / 2f;
                     count++;
@@ -74,22 +76,21 @@ public class GameScreen implements Screen {
 
         camera = new OrthographicCamera();
         viewport = new FitViewport(256, 176, camera);
-        // Câmera fixa na área central das colisões
+        // Câmera fixa na área central inicial
         camera.position.set(cx, cy, 0);
 
         batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
 
-        // Colocar o player no centro das colisões
+        // Colocar o player no centro
         player = new Player(cx - 8, cy - 8);
 
         // Carregar itens
         spriteSheet = new Texture("sprites/link-spritesheet.png");
-        itemsOnMap = new ArrayList<>();
 
-        // Adiciona a espada de madeira próxima ao player
+        // Adiciona a espada de madeira próxima ao player usando o novo manager
         Item woodenSword = new WoodenSword(cx + 32, cy - 8, spriteSheet);
-        itemsOnMap.add(woodenSword);
+        quadrantManager.addItem(woodenSword);
     }
 
     @Override
@@ -99,12 +100,16 @@ public class GameScreen implements Screen {
 
     @Override
     public void render(float delta) {
+        // Obter os itens e colisões do quadrante atual e adjacentes
+        List<Rectangle> activeCollisions = quadrantManager.getActiveCollisions(player.getPosition());
+        List<Item> activeItems = quadrantManager.getActiveItems(player.getPosition());
+
         // Atualiza lógica (update)
-        player.update(delta, collisionRects);
+        player.update(delta, activeCollisions);
 
         // Checar colisão com itens
         List<Item> itemsToRemove = new ArrayList<>();
-        for (Item item : itemsOnMap) {
+        for (Item item : activeItems) {
             if (item.isActive()) {
                 item.update(delta);
                 // Checa distância
@@ -114,7 +119,11 @@ public class GameScreen implements Screen {
                 }
             }
         }
-        itemsOnMap.removeAll(itemsToRemove);
+        
+        for (Item item : itemsToRemove) {
+            quadrantManager.removeItem(item);
+        }
+        activeItems.removeAll(itemsToRemove);
 
         // Lógica de câmera estilo Zelda (por quadrantes)
         float tileWidth = 256f;
@@ -148,7 +157,7 @@ public class GameScreen implements Screen {
 
         // Renderiza mapa e entidades
         batch.begin();
-        for (Item item : itemsOnMap) {
+        for (Item item : activeItems) {
             item.render(batch);
         }
         player.render(batch);
@@ -158,9 +167,9 @@ public class GameScreen implements Screen {
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
 
-        // Desenha as colisões em Vermelho
+        // Desenha as colisões ativas em Vermelho
         shapeRenderer.setColor(Color.RED);
-        for (Rectangle rect : collisionRects) {
+        for (Rectangle rect : activeCollisions) {
             shapeRenderer.rect(rect.x, rect.y, rect.width, rect.height);
         }
 

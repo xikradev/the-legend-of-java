@@ -1,0 +1,133 @@
+package com.legendofjava.core.world;
+
+import com.badlogic.gdx.maps.MapObject;
+import com.badlogic.gdx.maps.objects.RectangleMapObject;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
+import com.legendofjava.core.entities.Item;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class QuadrantManager {
+
+    public static final float TILE_WIDTH = 256f;
+    public static final float TILE_HEIGHT = 176f;
+    public static final float BORDER = 1f;
+
+    public static final float TOTAL_WIDTH = TILE_WIDTH + BORDER;
+    public static final float TOTAL_HEIGHT = TILE_HEIGHT + BORDER;
+    public static final float MAP_TOP = 4000f;
+
+    private Map<String, Quadrant> quadrants;
+
+    public QuadrantManager() {
+        this.quadrants = new HashMap<>();
+    }
+
+    public void loadFromMap(TiledMap map) {
+        if (map.getLayers().get("colisoes") != null) {
+            for (MapObject object : map.getLayers().get("colisoes").getObjects()) {
+                if (object instanceof RectangleMapObject) {
+                    Rectangle r = ((RectangleMapObject) object).getRectangle();
+
+                    int minCol = getCol(r.x);
+                    int maxCol = getCol(r.x + r.width);
+
+                    // O eixo Y do libGDX cresce para cima, logo r.y + r.height é o topo lógico do retângulo.
+                    // O grid do jogo tem Y=0 no topo do mundo (Y=4000 do LibGDX) e desce.
+                    int minRow = getRow(r.y + r.height);
+                    int maxRow = getRow(r.y);
+
+                    for (int col = minCol; col <= maxCol; col++) {
+                        for (int row = minRow; row <= maxRow; row++) {
+                            Quadrant q = getOrCreateQuadrant(col, row);
+                            q.addCollision(r);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public int getCol(float x) {
+        return (int) (x / TOTAL_WIDTH);
+    }
+
+    public int getRow(float y) {
+        float distFromTop = MAP_TOP - y;
+        return (int) (distFromTop / TOTAL_HEIGHT);
+    }
+
+    public Quadrant getOrCreateQuadrant(int col, int row) {
+        String key = col + "_" + row;
+        if (!quadrants.containsKey(key)) {
+            quadrants.put(key, new Quadrant(col, row));
+        }
+        return quadrants.get(key);
+    }
+
+    public void addItem(Item item) {
+        int col = getCol(item.getPosition().x);
+        int row = getRow(item.getPosition().y);
+        Quadrant q = getOrCreateQuadrant(col, row);
+        q.addItem(item);
+    }
+
+    public void removeItem(Item item) {
+        int centerCol = getCol(item.getPosition().x);
+        int centerRow = getRow(item.getPosition().y);
+
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
+                String key = (centerCol + i) + "_" + (centerRow + j);
+                if (quadrants.containsKey(key)) {
+                    quadrants.get(key).removeItem(item);
+                }
+            }
+        }
+    }
+
+    public List<Rectangle> getActiveCollisions(Vector2 playerPosition) {
+        List<Rectangle> active = new ArrayList<>();
+        int centerCol = getCol(playerPosition.x);
+        int centerRow = getRow(playerPosition.y);
+
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
+                String key = (centerCol + i) + "_" + (centerRow + j);
+                if (quadrants.containsKey(key)) {
+                    for (Rectangle r : quadrants.get(key).getCollisions()) {
+                        if (!active.contains(r)) {
+                            active.add(r);
+                        }
+                    }
+                }
+            }
+        }
+        return active;
+    }
+
+    public List<Item> getActiveItems(Vector2 playerPosition) {
+        List<Item> active = new ArrayList<>();
+        int centerCol = getCol(playerPosition.x);
+        int centerRow = getRow(playerPosition.y);
+
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
+                String key = (centerCol + i) + "_" + (centerRow + j);
+                if (quadrants.containsKey(key)) {
+                    for (Item item : quadrants.get(key).getItems()) {
+                        if (!active.contains(item)) {
+                            active.add(item);
+                        }
+                    }
+                }
+            }
+        }
+        return active;
+    }
+}
