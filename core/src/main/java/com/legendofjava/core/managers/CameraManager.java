@@ -18,27 +18,51 @@ public class CameraManager {
         camera = new OrthographicCamera();
         viewport = new FitViewport(256, 176, camera);
 
-        // Cálculo da média para colocar o player/câmera próximo às primeiras colisões
-        float cx = 0;
-        float cy = 0;
-        int count = 0;
-        if (map.getLayers().get("colisoes") != null) {
-            for (MapObject object : map.getLayers().get("colisoes").getObjects()) {
-                if (object instanceof RectangleMapObject) {
-                    Rectangle r = ((RectangleMapObject) object).getRectangle();
-                    cx += r.x + r.width / 2f;
-                    cy += r.y + r.height / 2f;
-                    count++;
+        float cx = -1;
+        float cy = -1;
+
+        // Try to find first_spawn point
+        if (map.getLayers().get("warps") != null) {
+            for (MapObject object : map.getLayers().get("warps").getObjects()) {
+                String type = (String) object.getProperties().get("type");
+                if (type == null) {
+                    type = (String) object.getProperties().get("class");
+                }
+                if ("first_spawn".equals(type)) {
+                    Float x = object.getProperties().get("x", Float.class);
+                    Float y = object.getProperties().get("y", Float.class);
+                    if (x != null && y != null) {
+                        cx = x;
+                        cy = y;
+                        break;
+                    }
                 }
             }
         }
 
-        if (count > 0) {
-            cx /= count;
-            cy /= count;
-        } else {
-            cx = 256 / 2f;
-            cy = 176 / 2f;
+        // Fallback: Cálculo da média para colocar o player/câmera próximo às primeiras colisões
+        if (cx == -1 && cy == -1) {
+            cx = 0;
+            cy = 0;
+            int count = 0;
+            if (map.getLayers().get("colisoes") != null) {
+                for (MapObject object : map.getLayers().get("colisoes").getObjects()) {
+                    if (object instanceof RectangleMapObject) {
+                        Rectangle r = ((RectangleMapObject) object).getRectangle();
+                        cx += r.x + r.width / 2f;
+                        cy += r.y + r.height / 2f;
+                        count++;
+                    }
+                }
+            }
+
+            if (count > 0) {
+                cx /= count;
+                cy /= count;
+            } else {
+                cx = 256 / 2f;
+                cy = 176 / 2f;
+            }
         }
 
         initialSpawn = new Vector2(cx, cy);
