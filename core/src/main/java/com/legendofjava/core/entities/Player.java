@@ -296,4 +296,8 @@ public class Player {
     public Vector2 getPosition() {
         return position;
     }
+
+    public void setPosition(float x, float y) {
+        position.set(x, y);
+    }
 }
