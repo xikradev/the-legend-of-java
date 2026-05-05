@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.1-8-g449813058" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="200" tileheight="200" infinite="0" nextlayerid="7" nextobjectid="83">
+<map version="1.10" tiledversion="1.12.1-8-g449813058" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="200" tileheight="200" infinite="0" nextlayerid="7" nextobjectid="89">
  <layer id="1" name="Camada de Blocos 1" width="30" height="20">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -43,6 +43,11 @@
   <object id="73" type="colision" x="1848" y="1239.75" width="9.25" height="46.25"/>
   <object id="74" type="colision" x="1858" y="1239.25" width="5.5" height="39.5"/>
   <object id="75" type="colision" x="1864.25" y="1240.25" width="15.75" height="15.75"/>
+  <object id="83" type="colision" x="1.5" y="1567" width="110.25" height="30"/>
+  <object id="84" type="colision" x="1.25" y="1421.25" width="30" height="145.75"/>
+  <object id="85" type="colision" x="31" y="1422.25" width="225.5" height="29"/>
+  <object id="86" type="colision" x="225.75" y="1452" width="30" height="145"/>
+  <object id="87" type="colision" x="145" y="1566.75" width="80.75" height="30"/>
  </objectgroup>
  <objectgroup id="5" name="warps">
   <object id="79" type="warp" x="1863.64" y="1256.42" width="16.1212" height="15.5455">
@@ -53,6 +58,7 @@
    </properties>
   </object>
   <object id="81" type="cave_exit" x="112.25" y="1587.5" width="32.5" height="15"/>
+  <object id="88" type="first_spawn" x="1895.5" y="1323"/>
  </objectgroup>
  <objectgroup id="6" name="items">
   <object id="82" type="wooden_sword" x="129" y="1505"/>

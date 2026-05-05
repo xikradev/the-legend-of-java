@@ -25,15 +25,15 @@ A base do projeto está dividida em dois módulos principais para isolar a lógi
 ### 2.2. Fluxo de Estado (Screens)
 O controle de cenas do jogo utiliza o padrão State (através das classes `Game` e `Screen` do LibGDX).
 - **`LegendOfJavaGame.java`:** É a aplicação central. Atua como máquina de estados, retendo referências para `SpriteBatch` genéricos, gerenciadores de fontes e delegando as requisições de ciclo de vida (render, dispose, pause) para a `Screen` atual.
-- **`GameScreen.java`:** Tela responsável pela lógica in-game. Instancia as camadas do mapa, as entidades, e calcula o *update* de estado separado da renderização gráfica.
+- **`GameScreen.java`:** Tela orquestradora da lógica in-game. Delega as responsabilidades de estado, físicas e de mundo para gerenciadores especializados (`CameraManager`, `WarpManager`, `QuadrantManager`), focando em dividir o fluxo em sub-métodos de `update` e `draw`.
 
 ### 2.3. Estrutura de Pacotes do Core
 O código-fonte em `core/src/main/java/com/legendofjava/core/` é organizado nos seguintes domínios:
 
 - `entities`: Contém os atores do jogo (Player, NPCs, Inimigos). Futuramente pode abrigar os componentes caso o projeto migre formalmente para uma arquitetura ECS (Entity Component System) com o framework Ashley.
-- `world`: Gerenciamento e renderização do cenário. Onde classes que lidam com mapas `Tiled` (.tmx), colisões de mapa, transição de salas e configuração da câmera ortográfica são armazenadas.
+- `world`: Gerenciamento e lógica do cenário. Contém classes como `QuadrantManager` para particionamento espacial, e `WarpManager` para transição de salas/cavernas e leitura do mapa `Tiled` (.tmx).
 - `physics`: Sistemas responsáveis pela detecção de colisão manual genérica ou instâncias de `Box2D` caso a física se torne estrita.
-- `managers`: Sistemas Singleton ou instanciados uma única vez, como `AssetManager` nativo do LibGDX, gerenciamento de estado de som e salvamento do progresso.
+- `managers`: Gerenciadores de sistemas do jogo, como o `CameraManager` (que cuida da transição de telas e viewport), `AssetManager` nativo do LibGDX, gerenciamento de estado de som e salvamento do progresso.
 - `screens`: Controladores de estado da interface. (Menu Principal, Tela de Jogo, Inventário de Pausa).
 - `utils`: Classes auxiliares e definição de constantes globais (ex: `Constants.java` configurando resolução virtual base 400x240).
 

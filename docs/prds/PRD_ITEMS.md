@@ -41,13 +41,14 @@ A `WoodenSword.java` materializa o conceito de arma, aplicando as abstrações d
 
 ---
 
-## 3. Gerenciamento na Tela de Jogo (`GameScreen`)
+## 3. Gerenciamento de Itens (`GameScreen` e `WarpManager`)
 
-A lógica de verificação de mundo precisava suportar a presença de dezenas de itens.
+A lógica de verificação de mundo precisa suportar a presença de dezenas de itens.
 
-- **Agrupamento (`List<Item> itemsOnMap`):** A antiga lógica de gerenciar uma única espada manualmente foi descontinuada em prol de uma lista de entidades polimórficas do tipo genérico `Item`.
-- **Loop de Colisão e Despawn:** No método `render` da `GameScreen`, existe agora uma varredura sobre os itens do mapa. É calculada a distância escalar entre o `Vector2` central do `Player` e o do `Item`.
-- Caso o jogador encoste (raio estipulado provisoriamente em `12f` pixels de colisão), o item invoca seu `onCollect`, aplica seus efeitos localmente e é inserido em uma fila de remoção (`itemsToRemove`) limpa imediatamente do mapa, prevenindo coletas duplicadas ("double-dipping").
+- **Agrupamento Dinâmico (`QuadrantManager`):** Os itens ativos são carregados sob demanda baseados no quadrante em que o jogador está, evitando processamento desnecessário de todo o mapa.
+- **Loop de Colisão e Despawn (`processItems`):** Na classe `GameScreen`, o método auxiliar `processItems(delta)` varre os itens ativos do mapa. É calculada a distância escalar entre o `Vector2` central do `Player` e o do `Item`.
+- Caso o jogador encoste (raio estipulado provisoriamente em `12f` pixels de colisão), o item invoca seu `onCollect`, aplica seus efeitos localmente e é inserido em uma fila de remoção (`itemsToRemove`) limpa imediatamente do mapa, prevenindo coletas duplicadas.
+- **Injeção de Itens em Cavernas:** Itens especiais em interiores são dinamicamente instanciados pelo `WarpManager` (ex: `WoodenSword`) no momento em que o jogador é teletransportado para uma sala que ainda não foi limpa.
 
 ---
 

@@ -21,7 +21,7 @@ O grande desafio técnico resolvido na câmera é o conflito de sistemas de coor
 O mapa base (`zelda-map.tmx`) tem uma altura total de **4000 pixels** (20 tiles de 200px). Como a camada de imagem é pendurada no topo do mapa, a linha 0 real do grid de quadrantes começa no `Y = 4000` do LibGDX e vai descendo.
 
 ### 1.3. Lógica Matemática da Câmera
-No método `render` de `GameScreen.java`, calculamos em qual quadrante o personagem está a cada frame:
+Na classe `CameraManager` (método `update`), calculamos em qual quadrante o personagem está a cada frame:
 ```java
 // Eixo X funciona normalmente (da esquerda pra direita)
 int coluna = (int) (player.getPosition().x / 257f);
