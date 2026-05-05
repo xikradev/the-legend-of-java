@@ -69,3 +69,19 @@ Ele injeta linhas na projeção atual da câmera desenhando:
 - **Linha Azul**: O exato retângulo do Hitbox dos pés do personagem.
 
 Isso provou ser essencial para alinhar a discrepância visual entre as posições calculadas e a imagem de fundo.
+
+---
+
+## 4. Otimização por Particionamento Espacial (Quadrantes)
+
+Para manter o desempenho ideal em um mapa aberto grande como o *overworld*, o jogo utiliza uma técnica de **Particionamento Espacial** estruturada em quadrantes, garantindo que objetos invisíveis não consumam CPU.
+
+### 4.1. Estrutura de Quadrantes (`Quadrant` e `QuadrantManager`)
+Em vez de iterar sobre todas as entidades e blocos de colisão do mapa a cada frame, a lógica foi encapsulada no módulo `core.world`:
+- **`Quadrant`**: Representa logicamente um "bloco de tela" de dimensões `257x177` pixels (a mesma proporção usada pela câmera). Cada objeto `Quadrant` mantém sua própria lista de colisões (`Rectangle`), itens e futuramente inimigos.
+- **`QuadrantManager`**: Durante a inicialização (`loadFromMap`), esta classe processa todos os objetos do Tiled Map. Ela calcula matematicamente (usando as mesmas fórmulas de `coluna` e `linha` da câmera) a qual quadrante cada retângulo pertence e os distribui. Retângulos que interceptam bordas são duplicados nos quadrantes afetados para evitar problemas de colisão durante as transições de tela.
+
+### 4.2. Carregamento em Buffer (Adjacências)
+Na classe `GameScreen`, no método `render()`, o jogo consulta o `QuadrantManager` para obter os objetos ativos. Para evitar *pop-in* de entidades e garantir que o *Player* não atravesse paredes ao pisar exatamente na linha de transição de duas telas, o sistema utiliza um **Buffer de Adjacência**:
+- O `QuadrantManager` varre não apenas o quadrante atual do *Player* `(x, y)`, mas também os 8 quadrantes vizinhos (de `x-1, y-1` a `x+1, y+1`).
+- As colisões e itens retornados pertencem apenas a esse bloco de 3x3 telas centradas no jogador, reduzindo drasticamente as checagens matemáticas no método `player.update()`.
