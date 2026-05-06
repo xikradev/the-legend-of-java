@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.1-8-g449813058" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="200" tileheight="200" infinite="0" nextlayerid="7" nextobjectid="89">
+<map version="1.10" tiledversion="1.12.1-8-g449813058" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="200" tileheight="200" infinite="0" nextlayerid="8" nextobjectid="94">
  <layer id="1" name="Camada de Blocos 1" width="30" height="20">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -61,6 +61,13 @@
   <object id="88" type="first_spawn" x="1895.5" y="1323"/>
  </objectgroup>
  <objectgroup id="6" name="items">
-  <object id="82" type="wooden_sword" x="129" y="1505"/>
+  <object id="82" type="item_cave_1" x="84.6136" y="1528.59"/>
+  <object id="89" type="item_cave_2" x="124.962" y="1528.48"/>
+  <object id="90" type="item_cave_3" x="167.667" y="1528.75"/>
+ </objectgroup>
+ <objectgroup id="7" name="npcs">
+  <object id="91" type="host_npc" x="120.977" y="1507.59"/>
+  <object id="92" type="fire" x="183.568" y="1507.86"/>
+  <object id="93" type="fire" x="65" y="1507.55"/>
  </objectgroup>
 </map>

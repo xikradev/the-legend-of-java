@@ -1,11 +1,14 @@
 package com.legendofjava.core.world;
 
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.legendofjava.core.entities.Item;
+import com.legendofjava.core.entities.HostNPC;
+import com.legendofjava.core.entities.Fire;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,7 +31,7 @@ public class QuadrantManager {
         this.quadrants = new HashMap<>();
     }
 
-    public void loadFromMap(TiledMap map) {
+    public void loadFromMap(TiledMap map, Texture npcSpriteSheet) {
         if (map.getLayers().get("colisoes") != null) {
             for (MapObject object : map.getLayers().get("colisoes").getObjects()) {
                 if (object instanceof RectangleMapObject) {
@@ -47,6 +50,37 @@ public class QuadrantManager {
                             Quadrant q = getOrCreateQuadrant(col, row);
                             q.addCollision(r);
                         }
+                    }
+                }
+            }
+        }
+
+        // Carrega NPCs e fogos da camada "npcs"
+        if (map.getLayers().get("npcs") != null) {
+            for (MapObject object : map.getLayers().get("npcs").getObjects()) {
+                String type = (String) object.getProperties().get("type");
+                if (type == null) {
+                    type = (String) object.getProperties().get("class");
+                }
+
+                Float objX = object.getProperties().get("x", Float.class);
+                Float objY = object.getProperties().get("y", Float.class);
+
+                if (objX != null && objY != null && type != null) {
+                    int col = getCol(objX);
+                    int row = getRow(objY);
+                    Quadrant q = getOrCreateQuadrant(col, row);
+
+                    if ("host_npc".equals(type)) {
+                        HostNPC npc = new HostNPC(objX, objY, npcSpriteSheet);
+                        q.addHostNpc(npc);
+                        // Adiciona o hitbox do NPC como colisão para impedir passagem
+                        q.addCollision(npc.getHitbox());
+                    } else if ("fire".equals(type)) {
+                        Fire fire = new Fire(objX, objY, npcSpriteSheet);
+                        q.addFire(fire);
+                        // Adiciona o hitbox do fogo como colisão para impedir passagem
+                        q.addCollision(fire.getHitbox());
                     }
                 }
             }
@@ -123,6 +157,46 @@ public class QuadrantManager {
                     for (Item item : quadrants.get(key).getItems()) {
                         if (!active.contains(item)) {
                             active.add(item);
+                        }
+                    }
+                }
+            }
+        }
+        return active;
+    }
+
+    public List<HostNPC> getActiveHostNpcs(Vector2 playerPosition) {
+        List<HostNPC> active = new ArrayList<>();
+        int centerCol = getCol(playerPosition.x);
+        int centerRow = getRow(playerPosition.y);
+
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
+                String key = (centerCol + i) + "_" + (centerRow + j);
+                if (quadrants.containsKey(key)) {
+                    for (HostNPC npc : quadrants.get(key).getHostNpcs()) {
+                        if (!active.contains(npc)) {
+                            active.add(npc);
+                        }
+                    }
+                }
+            }
+        }
+        return active;
+    }
+
+    public List<Fire> getActiveFires(Vector2 playerPosition) {
+        List<Fire> active = new ArrayList<>();
+        int centerCol = getCol(playerPosition.x);
+        int centerRow = getRow(playerPosition.y);
+
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
+                String key = (centerCol + i) + "_" + (centerRow + j);
+                if (quadrants.containsKey(key)) {
+                    for (Fire fire : quadrants.get(key).getFires()) {
+                        if (!active.contains(fire)) {
+                            active.add(fire);
                         }
                     }
                 }

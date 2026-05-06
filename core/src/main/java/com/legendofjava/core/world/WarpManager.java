@@ -22,8 +22,7 @@ public class WarpManager {
     private Map<String, Boolean> clearedCaves = new HashMap<>();
     private List<RectangleMapObject> warps = new ArrayList<>();
     private List<RectangleMapObject> caveExits = new ArrayList<>();
-    private float spawnX = 0;
-    private float spawnY = 0;
+    private Map<String, Vector2> itemSpawns = new HashMap<>();
     private Texture spriteSheet;
 
     public WarpManager(TiledMap map, Texture spriteSheet) {
@@ -53,12 +52,11 @@ public class WarpManager {
                 if (type == null)
                     type = (String) object.getProperties().get("class");
 
-                if ("wooden_sword".equals(type) || "item_spawn".equals(type)) {
+                if (type != null && type.startsWith("item_cave_")) {
                     Float objX = object.getProperties().get("x", Float.class);
                     Float objY = object.getProperties().get("y", Float.class);
                     if (objX != null && objY != null) {
-                        spawnX = objX;
-                        spawnY = objY;
+                        itemSpawns.put(type, new Vector2(objX, objY));
                     }
                 }
             }
@@ -85,8 +83,11 @@ public class WarpManager {
                     // Se houver um ID e a caverna não foi limpa, injeta o item
                     if (caveId != null && !clearedCaves.getOrDefault(caveId, false)) {
                         if ("start_sword_cave".equals(caveId)) {
-                            Item woodenSword = new WoodenSword(spawnX, spawnY, spriteSheet);
-                            quadrantManager.addItem(woodenSword);
+                            Vector2 spawnPos = itemSpawns.get("item_cave_2");
+                            if (spawnPos != null) {
+                                Item woodenSword = new WoodenSword(spawnPos.x, spawnPos.y, spriteSheet);
+                                quadrantManager.addItem(woodenSword);
+                            }
                         }
                     }
                     break;

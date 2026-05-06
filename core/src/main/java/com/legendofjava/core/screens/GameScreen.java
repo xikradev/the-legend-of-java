@@ -14,6 +14,8 @@ import com.badlogic.gdx.math.Vector2;
 import com.legendofjava.core.LegendOfJavaGame;
 import com.legendofjava.core.entities.Item;
 import com.legendofjava.core.entities.Player;
+import com.legendofjava.core.entities.HostNPC;
+import com.legendofjava.core.entities.Fire;
 import com.legendofjava.core.managers.CameraManager;
 import com.legendofjava.core.world.QuadrantManager;
 import com.legendofjava.core.world.WarpManager;
@@ -39,6 +41,7 @@ public class GameScreen implements Screen {
     private BitmapFont font;
 
     private Texture spriteSheet;
+    private Texture npcSpriteSheet;
 
     public GameScreen(LegendOfJavaGame game) {
         this.game = game;
@@ -57,11 +60,12 @@ public class GameScreen implements Screen {
         map = new TmxMapLoader().load("maps/zelda-map.tmx");
         mapRenderer = new OrthogonalTiledMapRenderer(map);
         spriteSheet = new Texture("sprites/link-spritesheet.png");
+        npcSpriteSheet = new Texture("sprites/npc-spritesheet.png");
     }
     
     private void initManagers() {
         quadrantManager = new QuadrantManager();
-        quadrantManager.loadFromMap(map);
+        quadrantManager.loadFromMap(map, npcSpriteSheet);
         
         cameraManager = new CameraManager(map);
         warpManager = new WarpManager(map, spriteSheet);
@@ -88,6 +92,12 @@ public class GameScreen implements Screen {
         
         // Atualiza lógica
         player.update(delta, activeCollisions);
+
+        // Atualiza os fogos ativos no quadrante
+        List<Fire> activeFires = quadrantManager.getActiveFires(player.getPosition());
+        for (Fire fire : activeFires) {
+            fire.update(delta);
+        }
 
         processItems(delta);
 
@@ -125,6 +135,8 @@ public class GameScreen implements Screen {
     private void draw() {
         // Obter os itens ativos para desenhar
         List<Item> activeItems = quadrantManager.getActiveItems(player.getPosition());
+        List<HostNPC> activeNpcs = quadrantManager.getActiveHostNpcs(player.getPosition());
+        List<Fire> activeFires = quadrantManager.getActiveFires(player.getPosition());
         List<Rectangle> activeCollisions = quadrantManager.getActiveCollisions(player.getPosition());
         
         mapRenderer.setView(cameraManager.getCamera());
@@ -136,6 +148,12 @@ public class GameScreen implements Screen {
         batch.begin();
         for (Item item : activeItems) {
             item.render(batch);
+        }
+        for (HostNPC npc : activeNpcs) {
+            npc.render(batch);
+        }
+        for (Fire fire : activeFires) {
+            fire.render(batch);
         }
         player.render(batch);
         
@@ -186,6 +204,9 @@ public class GameScreen implements Screen {
         player.dispose();
         if (spriteSheet != null) {
             spriteSheet.dispose();
+        }
+        if (npcSpriteSheet != null) {
+            npcSpriteSheet.dispose();
         }
         if (map != null) {
             map.dispose();

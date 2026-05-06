@@ -2,6 +2,8 @@ package com.legendofjava.core.world;
 
 import com.badlogic.gdx.math.Rectangle;
 import com.legendofjava.core.entities.Item;
+import com.legendofjava.core.entities.HostNPC;
+import com.legendofjava.core.entities.Fire;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,12 +14,16 @@ public class Quadrant {
 
     private List<Rectangle> collisions;
     private List<Item> items;
+    private List<HostNPC> hostNpcs;
+    private List<Fire> fires;
 
     public Quadrant(int col, int row) {
         this.col = col;
         this.row = row;
         this.collisions = new ArrayList<>();
         this.items = new ArrayList<>();
+        this.hostNpcs = new ArrayList<>();
+        this.fires = new ArrayList<>();
     }
 
     public List<Rectangle> getCollisions() {
@@ -39,4 +45,21 @@ public class Quadrant {
     public void removeItem(Item item) {
         items.remove(item);
     }
+
+    public List<HostNPC> getHostNpcs() {
+        return hostNpcs;
+    }
+
+    public void addHostNpc(HostNPC npc) {
+        hostNpcs.add(npc);
+    }
+
+    public List<Fire> getFires() {
+        return fires;
+    }
+
+    public void addFire(Fire fire) {
+        fires.add(fire);
+    }
 }
+
