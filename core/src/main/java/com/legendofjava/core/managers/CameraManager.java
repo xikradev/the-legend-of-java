@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.legendofjava.core.hud.HudRenderer;
 
 public class CameraManager {
     private OrthographicCamera camera;
@@ -98,9 +99,57 @@ public class CameraManager {
         camera.update();
     }
 
+    /**
+     * Atualiza o viewport do jogo levando em conta a área do HUD acima.
+     * O jogo (256x176) e o HUD (256x56) ocupam juntos 256x232 pixels virtuais.
+     * Escalonamos mantendo a proporção e centralizamos na janela.
+     *
+     * @param width  largura real da janela
+     * @param height altura real da janela
+     */
     public void resize(int width, int height) {
-        viewport.update(width, height);
+        float totalVirtualW = HudRenderer.HUD_WIDTH;   // 256
+        float totalVirtualH = HudRenderer.GAME_HEIGHT + HudRenderer.HUD_HEIGHT; // 176 + 56 = 232
+
+        // Calcular escala que mantém a proporção total (256x232) dentro da janela
+        float scaleX = width  / totalVirtualW;
+        float scaleY = height / totalVirtualH;
+        float scale  = Math.min(scaleX, scaleY);
+
+        int gamePixelW = (int) (HudRenderer.GAME_WIDTH  * scale);
+        int gamePixelH = (int) (HudRenderer.GAME_HEIGHT * scale);
+        int hudPixelH  = (int) (HudRenderer.HUD_HEIGHT  * scale);
+
+        // Centralizar horizontalmente
+        int offsetX = (width - gamePixelW) / 2;
+        // O jogo fica na base (Y=0 até gamePixelH); o HUD ficará acima
+        int gameOffsetY = (height - gamePixelH - hudPixelH) / 2;
+
+        viewport.update(gamePixelW, gamePixelH, false);
+        viewport.setScreenBounds(offsetX, gameOffsetY, gamePixelW, gamePixelH);
+        camera.position.set(camera.position.x, camera.position.y, 0);
+        camera.update();
+
+        // Salva para uso externo (HudRenderer.resize)
+        this.lastScale = scale;
+        this.lastOffsetX = offsetX;
+        this.lastGameOffsetY = gameOffsetY;
+        this.lastGamePixelW = gamePixelW;
+        this.lastGamePixelH = gamePixelH;
     }
+
+    // Dados do último resize, usados pelo HudRenderer
+    private float lastScale = 1f;
+    private int lastOffsetX = 0;
+    private int lastGameOffsetY = 0;
+    private int lastGamePixelW = 256;
+    private int lastGamePixelH = 176;
+
+    public float getLastScale()       { return lastScale; }
+    public int   getLastOffsetX()     { return lastOffsetX; }
+    public int   getLastGameOffsetY() { return lastGameOffsetY; }
+    public int   getLastGamePixelW()  { return lastGamePixelW; }
+    public int   getLastGamePixelH()  { return lastGamePixelH; }
 
     public OrthographicCamera getCamera() {
         return camera;

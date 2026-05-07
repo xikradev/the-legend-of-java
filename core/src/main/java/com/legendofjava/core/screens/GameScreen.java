@@ -1,5 +1,6 @@
 package com.legendofjava.core.screens;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
@@ -16,6 +17,7 @@ import com.legendofjava.core.entities.Item;
 import com.legendofjava.core.entities.Player;
 import com.legendofjava.core.entities.HostNPC;
 import com.legendofjava.core.entities.Fire;
+import com.legendofjava.core.hud.HudRenderer;
 import com.legendofjava.core.managers.CameraManager;
 import com.legendofjava.core.world.QuadrantManager;
 import com.legendofjava.core.world.WarpManager;
@@ -42,6 +44,8 @@ public class GameScreen implements Screen {
 
     private Texture spriteSheet;
     private Texture npcSpriteSheet;
+    private Texture hudSpriteSheet;
+    private HudRenderer hudRenderer;
 
     public GameScreen(LegendOfJavaGame game) {
         this.game = game;
@@ -54,6 +58,9 @@ public class GameScreen implements Screen {
         shapeRenderer = new ShapeRenderer();
         font = new BitmapFont();
         font.getData().setScale(0.5f);
+
+        // Aciona o resize inicial para configurar os bounds dos viewports
+        resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
     }
 
     private void initMap() {
@@ -61,6 +68,8 @@ public class GameScreen implements Screen {
         mapRenderer = new OrthogonalTiledMapRenderer(map);
         spriteSheet = new Texture("sprites/link-spritesheet.png");
         npcSpriteSheet = new Texture("sprites/npc-spritesheet.png");
+        hudSpriteSheet = new Texture("sprites/hub-spritesheet.png");
+        hudRenderer = new HudRenderer(hudSpriteSheet);
     }
     
     private void initManagers() {
@@ -163,6 +172,12 @@ public class GameScreen implements Screen {
         
         batch.end();
 
+        // Renderiza o HUD acima do viewport do jogo
+        hudRenderer.render(batch, player);
+
+        // Restaura o viewport do jogo para os ShapeRenderers de debug
+        cameraManager.getViewport().apply();
+
         // Desenhar os Hitboxes para debug visual
         shapeRenderer.setProjectionMatrix(cameraManager.getCamera().combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
@@ -184,6 +199,7 @@ public class GameScreen implements Screen {
     @Override
     public void resize(int width, int height) {
         cameraManager.resize(width, height);
+        hudRenderer.resize(cameraManager);
     }
 
     @Override
@@ -207,6 +223,12 @@ public class GameScreen implements Screen {
         }
         if (npcSpriteSheet != null) {
             npcSpriteSheet.dispose();
+        }
+        if (hudSpriteSheet != null) {
+            hudSpriteSheet.dispose();
+        }
+        if (hudRenderer != null) {
+            hudRenderer.dispose();
         }
         if (map != null) {
             map.dispose();
