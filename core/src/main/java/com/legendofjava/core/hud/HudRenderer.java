@@ -58,6 +58,9 @@ public class HudRenderer implements Disposable {
      */
     private final TextureRegion hudRegion;
 
+    private final Texture heartTexture;
+    private final Texture blackTexture;
+
     /**
      * @param hudSheet  Textura do hub-spritesheet.png (gerenciada externamente)
      */
@@ -71,6 +74,14 @@ public class HudRenderer implements Disposable {
         //   x=264, y=11, w=250, h=54
         // Renderizamos esticado para preencher os 256x56 virtuais do HUD.
         hudRegion = new TextureRegion(hudSheet, 264, 11, 250, 54);
+
+        heartTexture = new Texture("sprites/heart.png");
+
+        com.badlogic.gdx.graphics.Pixmap pixmap = new com.badlogic.gdx.graphics.Pixmap(1, 1, com.badlogic.gdx.graphics.Pixmap.Format.RGBA8888);
+        pixmap.setColor(0, 0, 0, 1);
+        pixmap.fill();
+        blackTexture = new Texture(pixmap);
+        pixmap.dispose();
     }
 
     /**
@@ -113,10 +124,41 @@ public class HudRenderer implements Disposable {
         // Renderiza o HUD completo do spritesheet, esticando para 256x56 virtuais.
         // O HUD original tem 250x54, escalado para 256x56 mantendo a proporção visual.
         batch.draw(hudRegion, 0f, 0f, HUD_WIDTH, HUD_HEIGHT);
+
+        // O bloco de corações no HUD original ocupa a área:
+        // x=434 a 497 (largura 64) e y=43 a 58 (altura 16) no spritesheet.
+        // Relativo à hudRegion (x=264, y=11, w=250, h=54):
+        // offset X = 170, offset Y do topo = 32.
+        // Convertendo para coordenadas virtuais do HUD (onde 0,0 é embaixo):
+        float startX = 174.08f; // 170 * (256/250)
+        float startY = 6.22f;   // 54 - 32 - 16 = 6. 6 * (56/54)
+        float totalW = 65.54f;  // 64 * (256/250)
+        float totalH = 16.59f;  // 16 * (56/54)
+        
+        // Desenha retângulo preto sobre todos os slots
+        batch.draw(blackTexture, startX, startY, totalW, totalH);
+
+        // Cada slot no grid 8x2
+        float slotW = totalW / 8f;
+        float slotH = totalH / 2f;
+
+        int heartsToDraw = player.getCurrentHearts();
+
+        for (int i = 0; i < heartsToDraw; i++) {
+            int col = i % 8;
+            int row = i / 8; // 0 é a linha de cima, 1 é a de baixo
+            
+            float x = startX + col * slotW;
+            float y = startY + totalH - (row + 1) * slotH;
+            
+            batch.draw(heartTexture, x, y, slotW, slotH);
+        }
     }
 
     @Override
     public void dispose() {
         // hudSheet é gerenciado pelo GameScreen, não fazemos dispose aqui.
+        if (heartTexture != null) heartTexture.dispose();
+        if (blackTexture != null) blackTexture.dispose();
     }
 }

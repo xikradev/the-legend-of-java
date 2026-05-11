@@ -15,6 +15,9 @@ public class Player {
     private Vector2 velocity;
     private final float speed = 100f; // pixels per second
     
+    private int maxHearts = 3;
+    private int currentHearts = 3;
+
     private boolean hasSword = false;
 
     private Texture spriteSheet;
@@ -299,5 +302,21 @@ public class Player {
 
     public void setPosition(float x, float y) {
         position.set(x, y);
+    }
+
+    public int getMaxHearts() {
+        return maxHearts;
+    }
+
+    public void setMaxHearts(int maxHearts) {
+        this.maxHearts = maxHearts;
+    }
+
+    public int getCurrentHearts() {
+        return currentHearts;
+    }
+
+    public void setCurrentHearts(int currentHearts) {
+        this.currentHearts = currentHearts;
     }
 }
