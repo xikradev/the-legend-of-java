@@ -1,6 +1,8 @@
 package com.legendofjava.core.screens;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -45,18 +47,28 @@ public class GameScreen implements Screen {
     private Texture spriteSheet;
     private Texture npcSpriteSheet;
 
+    private Music overworldTheme;
+
     public GameScreen(LegendOfJavaGame game) {
         this.game = game;
         
         initMap();
         initManagers();
         initPlayer();
+        initAudio();
 
         batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
         font = new BitmapFont();
         font.getData().setScale(0.5f);
         hudRenderer = new HudRenderer();
+    }
+
+    private void initAudio() {
+        overworldTheme = Gdx.audio.newMusic(Gdx.files.internal("audio/music/overworld-theme.mp3"));
+        overworldTheme.setLooping(true);
+        overworldTheme.setVolume(0.5f); // Optional starting volume
+        overworldTheme.play();
     }
 
     private void initMap() {
@@ -207,10 +219,16 @@ public class GameScreen implements Screen {
 
     @Override
     public void pause() {
+        if (overworldTheme != null && overworldTheme.isPlaying()) {
+            overworldTheme.pause();
+        }
     }
 
     @Override
     public void resume() {
+        if (overworldTheme != null) {
+            overworldTheme.play();
+        }
     }
 
     @Override
@@ -241,6 +259,9 @@ public class GameScreen implements Screen {
         }
         if (hudRenderer != null) {
             hudRenderer.dispose();
+        }
+        if (overworldTheme != null) {
+            overworldTheme.dispose();
         }
     }
 }
