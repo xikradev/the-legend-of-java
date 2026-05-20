@@ -3,6 +3,7 @@ package com.legendofjava.core.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -48,6 +49,8 @@ public class GameScreen implements Screen {
     private Texture npcSpriteSheet;
 
     private Music overworldTheme;
+    private Sound receiveItemSound;
+    private boolean wasPickingUp = false;
 
     public GameScreen(LegendOfJavaGame game) {
         this.game = game;
@@ -69,6 +72,8 @@ public class GameScreen implements Screen {
         overworldTheme.setLooping(true);
         overworldTheme.setVolume(0.5f); // Optional starting volume
         overworldTheme.play();
+
+        receiveItemSound = Gdx.audio.newSound(Gdx.files.internal("audio/sfx/receive-item.mp3"));
     }
 
     private void initMap() {
@@ -107,6 +112,18 @@ public class GameScreen implements Screen {
         
         // Atualiza lógica
         player.update(delta, activeCollisions);
+
+        boolean isPickingUp = player.getCurrentState() == Player.State.PICKING_UP;
+        if (isPickingUp && !wasPickingUp) {
+            if (overworldTheme.isPlaying()) {
+                overworldTheme.pause();
+                overworldTheme.setPosition(0);
+            }
+            receiveItemSound.play(0.8f);
+        } else if (!isPickingUp && wasPickingUp) {
+            overworldTheme.play();
+        }
+        wasPickingUp = isPickingUp;
 
         // Atualiza os fogos ativos no quadrante
         List<Fire> activeFires = quadrantManager.getActiveFires(player.getPosition());
@@ -262,6 +279,9 @@ public class GameScreen implements Screen {
         }
         if (overworldTheme != null) {
             overworldTheme.dispose();
+        }
+        if (receiveItemSound != null) {
+            receiveItemSound.dispose();
         }
     }
 }

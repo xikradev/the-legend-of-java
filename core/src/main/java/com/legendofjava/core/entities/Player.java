@@ -36,12 +36,16 @@ public class Player {
     private Animation<TextureRegion> attackUp;
     private Animation<TextureRegion> attackLeft;
 
+    private TextureRegion pickUpFrame;
+    private TextureRegion swordPickupSprite;
+
     private float stateTime;
     private State lastDirection = State.WALKING_DOWN;
 
     public enum State {
         IDLE, WALKING_UP, WALKING_DOWN, WALKING_LEFT, WALKING_RIGHT,
-        ATTACKING_UP, ATTACKING_DOWN, ATTACKING_LEFT, ATTACKING_RIGHT
+        ATTACKING_UP, ATTACKING_DOWN, ATTACKING_LEFT, ATTACKING_RIGHT,
+        PICKING_UP
     }
 
     private State currentState;
@@ -117,6 +121,9 @@ public class Player {
         attackUp = new Animation<>(attackDuration, atkUp1, atkUp2, atkUp3, atkUp4);
         attackLeft = new Animation<>(attackDuration, atkLeft1, atkLeft2, atkLeft3, atkLeft4);
 
+        pickUpFrame = new TextureRegion(spriteSheet, 214, 11, 16, 16);
+        swordPickupSprite = new TextureRegion(spriteSheet, 1, 154, 7, 16);
+
         currentFrame = down1; // Default looking down
     }
 
@@ -125,9 +132,13 @@ public class Player {
             invulnerabilityTimer -= delta;
         }
 
-        handleInput();
+        if (currentState == State.PICKING_UP) {
+            velocity.set(0, 0);
+        } else {
+            handleInput();
+        }
 
-        if (!isAttacking()) {
+        if (!isAttacking() && currentState != State.PICKING_UP) {
             float oldX = position.x;
             float oldY = position.y;
 
@@ -169,6 +180,10 @@ public class Player {
         if (isAttacking()) {
             Animation<TextureRegion> anim = getAttackAnimation();
             if (anim.isAnimationFinished(stateTime)) {
+                currentState = State.IDLE;
+            }
+        } else if (currentState == State.PICKING_UP) {
+            if (stateTime > 1.5f) { // 1.5 segundos de animação
                 currentState = State.IDLE;
             }
         }
@@ -261,6 +276,9 @@ public class Player {
             case ATTACKING_LEFT:
                 currentFrame = attackLeft.getKeyFrame(stateTime);
                 break;
+            case PICKING_UP:
+                currentFrame = pickUpFrame;
+                break;
             case IDLE:
                 if (lastDirection == State.WALKING_UP)
                     currentFrame = walkUp.getKeyFrames()[0];
@@ -294,6 +312,12 @@ public class Player {
             }
             
             batch.draw(currentFrame, drawX, drawY, currentFrame.getRegionWidth(), currentFrame.getRegionHeight());
+
+            if (currentState == State.PICKING_UP && swordPickupSprite != null) {
+                float swordX = position.x + (16 - swordPickupSprite.getRegionWidth()) / 2f;
+                float swordY = position.y + 16;
+                batch.draw(swordPickupSprite, swordX, swordY, swordPickupSprite.getRegionWidth(), swordPickupSprite.getRegionHeight());
+            }
         }
     }
 
@@ -303,12 +327,18 @@ public class Player {
         }
     }
 
+    public State getCurrentState() {
+        return currentState;
+    }
+
     public boolean hasSword() {
         return hasSword;
     }
 
     public void giveSword() {
         this.hasSword = true;
+        this.currentState = State.PICKING_UP;
+        this.stateTime = 0;
     }
 
     // -------- Vida --------
