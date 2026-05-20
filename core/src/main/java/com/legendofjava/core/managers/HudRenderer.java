@@ -4,6 +4,10 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.legendofjava.core.entities.Player;
 
@@ -34,7 +38,7 @@ public class HudRenderer {
     private static final float HUD_HEIGHT = 176f;
 
     // Altura da faixa preta do HUD
-    public static final float HUD_BAR_HEIGHT = 16f;
+    public static final float HUD_BAR_HEIGHT = 24f;
 
     // Tamanho de cada pixel do coração (escala pixel-art)
     private static final float PX = 1.2f;
@@ -58,6 +62,11 @@ public class HudRenderer {
     private OrthographicCamera hudCamera;
     private Viewport            hudViewport;
     private ShapeRenderer       shape;
+    
+    private SpriteBatch         batch;
+    private BitmapFont          font;
+    private Texture             spriteSheet;
+    private TextureRegion       swordRegion;
 
     public HudRenderer() {
         hudCamera = new OrthographicCamera();
@@ -66,6 +75,12 @@ public class HudRenderer {
         hudCamera.update();
 
         shape = new ShapeRenderer();
+        batch = new SpriteBatch();
+        font = new BitmapFont();
+        font.getData().setScale(0.5f); // Fonte menor para caber na HUD
+        
+        spriteSheet = new Texture("sprites/link-spritesheet.png");
+        swordRegion = new TextureRegion(spriteSheet, 1, 154, 7, 16);
     }
 
     /**
@@ -101,6 +116,37 @@ public class HudRenderer {
         // Canto direito da faixa, com margem de 3px
         float startX = HUD_WIDTH - totalW - 3f;
         float startY = HUD_HEIGHT - HUD_BAR_HEIGHT + (HUD_BAR_HEIGHT - HEART_H) / 2f;
+
+        // ── Caixa da Arma (Weapon Box) ───────────────────────────────────────
+        float boxWidth = 24f;
+        float boxHeight = 18f;
+        // Posição da caixa rente ao canto esquerdo
+        float boxX = 4f; 
+        float boxY = HUD_HEIGHT - HUD_BAR_HEIGHT + (HUD_BAR_HEIGHT - boxHeight) / 2f;
+
+        // Fundo Preto
+        shape.begin(ShapeRenderer.ShapeType.Filled);
+        shape.setColor(Color.BLACK);
+        shape.rect(boxX, boxY, boxWidth, boxHeight);
+        shape.end();
+
+        // Borda Verde
+        shape.begin(ShapeRenderer.ShapeType.Line);
+        shape.setColor(Color.GREEN);
+        shape.rect(boxX, boxY, boxWidth, boxHeight);
+        shape.end();
+
+        // Espada (se tiver)
+        batch.setProjectionMatrix(hudCamera.combined);
+        batch.begin();
+        
+        if (player.hasSword()) {
+            // Desenha a espada centralizada na caixa
+            float swordX = boxX + (boxWidth - swordRegion.getRegionWidth()) / 2f;
+            float swordY = boxY + (boxHeight - swordRegion.getRegionHeight()) / 2f;
+            batch.draw(swordRegion, swordX, swordY);
+        }
+        batch.end();
 
         shape.begin(ShapeRenderer.ShapeType.Filled);
 
@@ -182,5 +228,8 @@ public class HudRenderer {
 
     public void dispose() {
         if (shape != null) shape.dispose();
+        if (batch != null) batch.dispose();
+        if (font != null) font.dispose();
+        if (spriteSheet != null) spriteSheet.dispose();
     }
 }
