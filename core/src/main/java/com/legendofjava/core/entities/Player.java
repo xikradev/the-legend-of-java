@@ -18,6 +18,9 @@ public class Player {
     // Sistema de vida: 10 HP = 5 corações (cada coração = 2 HP)
     private int health    = 10;
     private int maxHealth = 10;
+    
+    private float invulnerabilityTimer = 0f;
+    private static final float INVULNERABILITY_DURATION = 1.0f; // 1 segundo
 
     private boolean hasSword = false;
 
@@ -118,6 +121,10 @@ public class Player {
     }
 
     public void update(float delta, List<Rectangle> collisionRects) {
+        if (invulnerabilityTimer > 0) {
+            invulnerabilityTimer -= delta;
+        }
+
         handleInput();
 
         if (!isAttacking()) {
@@ -269,6 +276,13 @@ public class Player {
 
     public void render(SpriteBatch batch) {
         if (currentFrame != null) {
+            // Efeito de piscar quando invulnerável
+            if (invulnerabilityTimer > 0) {
+                if ((int)(invulnerabilityTimer * 15) % 2 == 0) {
+                    return; // Pula o desenho para criar o efeito de piscar
+                }
+            }
+
             float drawX = position.x;
             float drawY = position.y;
             
@@ -301,7 +315,9 @@ public class Player {
 
     /** Reduz a vida do player. Cada dano = 1 ponto (meio coração). */
     public void takeDamage(int amount) {
+        if (invulnerabilityTimer > 0) return;
         health = Math.max(0, health - amount);
+        invulnerabilityTimer = INVULNERABILITY_DURATION;
     }
 
     public int getHealth() {

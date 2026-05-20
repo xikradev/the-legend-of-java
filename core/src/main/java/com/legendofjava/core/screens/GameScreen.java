@@ -98,8 +98,20 @@ public class GameScreen implements Screen {
 
         // Atualiza os fogos ativos no quadrante
         List<Fire> activeFires = quadrantManager.getActiveFires(player.getPosition());
+        Rectangle playerHitbox = player.getHitbox();
+        
+        // Cria uma hitbox ligeiramente expandida (1 pixel) para detectar quando o player
+        // apenas "encosta" no fogo, já que a física normal impede a sobreposição total.
+        Rectangle damageHitbox = new Rectangle(
+            playerHitbox.x - 1, playerHitbox.y - 1, 
+            playerHitbox.width + 2, playerHitbox.height + 2
+        );
+        
         for (Fire fire : activeFires) {
             fire.update(delta);
+            if (damageHitbox.overlaps(fire.getHitbox())) {
+                player.takeDamage(1);
+            }
         }
 
         processItems(delta);
