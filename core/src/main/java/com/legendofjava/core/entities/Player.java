@@ -14,7 +14,11 @@ public class Player {
     private Vector2 position;
     private Vector2 velocity;
     private final float speed = 100f; // pixels per second
-    
+
+    // Sistema de vida: 10 HP = 5 corações (cada coração = 2 HP)
+    private int health    = 10;
+    private int maxHealth = 10;
+
     private boolean hasSword = false;
 
     private Texture spriteSheet;
@@ -292,6 +296,27 @@ public class Player {
     public void giveSword() {
         this.hasSword = true;
     }
+
+    // -------- Vida --------
+
+    /** Reduz a vida do player. Cada dano = 1 ponto (meio coração). */
+    public void takeDamage(int amount) {
+        health = Math.max(0, health - amount);
+    }
+
+    public int getHealth() {
+        return health;
+    }
+
+    public int getMaxHealth() {
+        return maxHealth;
+    }
+
+    public boolean isDead() {
+        return health <= 0;
+    }
+
+    // -------- Posição --------
 
     public Vector2 getPosition() {
         return position;

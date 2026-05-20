@@ -17,6 +17,7 @@ import com.legendofjava.core.entities.Player;
 import com.legendofjava.core.entities.HostNPC;
 import com.legendofjava.core.entities.Fire;
 import com.legendofjava.core.managers.CameraManager;
+import com.legendofjava.core.managers.HudRenderer;
 import com.legendofjava.core.world.QuadrantManager;
 import com.legendofjava.core.world.WarpManager;
 
@@ -39,6 +40,7 @@ public class GameScreen implements Screen {
     
     private ShapeRenderer shapeRenderer;
     private BitmapFont font;
+    private HudRenderer hudRenderer;
 
     private Texture spriteSheet;
     private Texture npcSpriteSheet;
@@ -54,6 +56,7 @@ public class GameScreen implements Screen {
         shapeRenderer = new ShapeRenderer();
         font = new BitmapFont();
         font.getData().setScale(0.5f);
+        hudRenderer = new HudRenderer();
     }
 
     private void initMap() {
@@ -179,11 +182,15 @@ public class GameScreen implements Screen {
         shapeRenderer.rect(pRect.x, pRect.y, pRect.width, pRect.height);
 
         shapeRenderer.end();
+
+        // ── HUD (sempre por cima do mundo) ──────────────────────────────────
+        hudRenderer.render(player);
     }
 
     @Override
     public void resize(int width, int height) {
         cameraManager.resize(width, height);
+        hudRenderer.resize(width, height);
     }
 
     @Override
@@ -219,6 +226,9 @@ public class GameScreen implements Screen {
         }
         if (font != null) {
             font.dispose();
+        }
+        if (hudRenderer != null) {
+            hudRenderer.dispose();
         }
     }
 }
