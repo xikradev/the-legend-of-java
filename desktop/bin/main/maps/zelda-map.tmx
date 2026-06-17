@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.1-8-g449813058" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="200" tileheight="200" infinite="0" nextlayerid="8" nextobjectid="94">
+<map version="1.10" tiledversion="1.12.2-2-geb83ddb9" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="200" tileheight="200" infinite="0" nextlayerid="9" nextobjectid="99">
  <layer id="1" name="Camada de Blocos 1" width="30" height="20">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -69,5 +69,22 @@
   <object id="91" type="host_npc" x="120.977" y="1507.59"/>
   <object id="92" type="fire" x="183.568" y="1507.86"/>
   <object id="93" type="fire" x="65" y="1507.55"/>
+ </objectgroup>
+ <objectgroup id="8" name="inemies">
+  <object id="96" type="octorok" x="2297.25" y="1323.1" width="9.5" height="9.13636">
+   <properties>
+    <property name="hit" type="float" value="0.5"/>
+   </properties>
+  </object>
+  <object id="97" type="octorok" x="2179.58" y="1371.77" width="9.5" height="9.13636">
+   <properties>
+    <property name="hit" type="float" value="0.5"/>
+   </properties>
+  </object>
+  <object id="98" type="octorok" x="2178.25" y="1276.43" width="9.5" height="9.13636">
+   <properties>
+    <property name="hit" type="float" value="0.5"/>
+   </properties>
+  </object>
  </objectgroup>
 </map>
