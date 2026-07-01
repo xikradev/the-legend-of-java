@@ -9,6 +9,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.legendofjava.core.entities.Item;
 import com.legendofjava.core.entities.HostNPC;
 import com.legendofjava.core.entities.Fire;
+import com.legendofjava.core.entities.Octorok;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,7 +32,7 @@ public class QuadrantManager {
         this.quadrants = new HashMap<>();
     }
 
-    public void loadFromMap(TiledMap map, Texture npcSpriteSheet) {
+    public void loadFromMap(TiledMap map, Texture npcSpriteSheet, Texture enemiesSpriteSheet) {
         if (map.getLayers().get("colisoes") != null) {
             for (MapObject object : map.getLayers().get("colisoes").getObjects()) {
                 if (object instanceof RectangleMapObject) {
@@ -85,6 +86,29 @@ public class QuadrantManager {
                 }
             }
         }
+
+        // Carrega inimigos da camada "inemies" (Octorok, etc.)
+        if (map.getLayers().get("inemies") != null) {
+            for (MapObject object : map.getLayers().get("inemies").getObjects()) {
+                String type = (String) object.getProperties().get("type");
+                if (type == null) type = (String) object.getProperties().get("class");
+
+                Float objX = object.getProperties().get("x", Float.class);
+                Float objY = object.getProperties().get("y", Float.class);
+
+                if (objX != null && objY != null && "octorok".equals(type)) {
+                    float hit = 0.5f;
+                    Object hitProp = object.getProperties().get("hit");
+                    if (hitProp instanceof Float)  hit = (Float)  hitProp;
+                    if (hitProp instanceof Double) hit = ((Double) hitProp).floatValue();
+
+                    int col = getCol(objX);
+                    int row = getRow(objY);
+                    Quadrant q = getOrCreateQuadrant(col, row);
+                    q.addOctorok(new Octorok(objX, objY, hit, enemiesSpriteSheet));
+                }
+            }
+        }
     }
 
     public int getCol(float x) {
@@ -120,6 +144,20 @@ public class QuadrantManager {
                 String key = (centerCol + i) + "_" + (centerRow + j);
                 if (quadrants.containsKey(key)) {
                     quadrants.get(key).removeItem(item);
+                }
+            }
+        }
+    }
+
+    public void removeOctorok(Octorok octorok) {
+        int centerCol = getCol(octorok.getPosition().x);
+        int centerRow = getRow(octorok.getPosition().y);
+
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
+                String key = (centerCol + i) + "_" + (centerRow + j);
+                if (quadrants.containsKey(key)) {
+                    quadrants.get(key).removeOctorok(octorok);
                 }
             }
         }
@@ -203,5 +241,19 @@ public class QuadrantManager {
             }
         }
         return active;
+    }
+
+    /**
+     * Returns Octoroks only from the exact quadrant the player is in.
+     * (Enemies are not rendered from adjacent quadrants, per design spec.)
+     */
+    public List<Octorok> getActiveOctoroks(Vector2 playerPosition) {
+        int col = getCol(playerPosition.x);
+        int row = getRow(playerPosition.y);
+        String key = col + "_" + row;
+        if (quadrants.containsKey(key)) {
+            return quadrants.get(key).getOctoroks();
+        }
+        return new java.util.ArrayList<>();
     }
 }

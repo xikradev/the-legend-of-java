@@ -19,6 +19,7 @@ import com.legendofjava.core.entities.Item;
 import com.legendofjava.core.entities.Player;
 import com.legendofjava.core.entities.HostNPC;
 import com.legendofjava.core.entities.Fire;
+import com.legendofjava.core.entities.Octorok;
 import com.legendofjava.core.managers.CameraManager;
 import com.legendofjava.core.managers.HudRenderer;
 import com.legendofjava.core.world.QuadrantManager;
@@ -47,6 +48,7 @@ public class GameScreen implements Screen {
 
     private Texture spriteSheet;
     private Texture npcSpriteSheet;
+    private Texture enemiesSpriteSheet;
 
     private Music overworldTheme;
     private Sound receiveItemSound;
@@ -79,13 +81,14 @@ public class GameScreen implements Screen {
     private void initMap() {
         map = new TmxMapLoader().load("maps/zelda-map.tmx");
         mapRenderer = new OrthogonalTiledMapRenderer(map);
-        spriteSheet = new Texture("sprites/link-spritesheet.png");
-        npcSpriteSheet = new Texture("sprites/npc-spritesheet.png");
+        spriteSheet        = new Texture("sprites/link-spritesheet.png");
+        npcSpriteSheet     = new Texture("sprites/npc-spritesheet.png");
+        enemiesSpriteSheet = new Texture("sprites/enemies-spritesheet.png");
     }
     
     private void initManagers() {
         quadrantManager = new QuadrantManager();
-        quadrantManager.loadFromMap(map, npcSpriteSheet);
+        quadrantManager.loadFromMap(map, npcSpriteSheet, enemiesSpriteSheet);
         
         cameraManager = new CameraManager(map);
         warpManager = new WarpManager(map, spriteSheet);
@@ -109,8 +112,18 @@ public class GameScreen implements Screen {
     private void update(float delta) {
         // Obter as colisões do quadrante atual e adjacentes
         List<Rectangle> activeCollisions = quadrantManager.getActiveCollisions(player.getPosition());
-        
-        // Atualiza lógica
+
+        // ── Octoroks ── (deve ser antes do player.update para incluir na colisão)
+        List<Octorok> activeOctoroks = quadrantManager.getActiveOctoroks(player.getPosition());
+
+        // Adiciona hitboxes dos Octoroks VIVOS como obstáculo sólido ao player
+        for (Octorok octorok : activeOctoroks) {
+            if (!octorok.isDead()) {
+                activeCollisions.add(octorok.getHitbox());
+            }
+        }
+
+        // Atualiza lógica do player (já com hitboxes dos inimigos na lista)
         player.update(delta, activeCollisions);
 
         boolean isPickingUp = player.getCurrentState() == Player.State.PICKING_UP;
@@ -148,6 +161,71 @@ public class GameScreen implements Screen {
         warpManager.checkTeleports(player, quadrantManager);
         
         cameraManager.update(player.getPosition());
+
+        // Processa Octoroks: dano, espada e remoção
+        Rectangle playerDamageBox = new Rectangle(
+            player.getHitbox().x - 1, player.getHitbox().y - 1,
+            player.getHitbox().width + 2, player.getHitbox().height + 2
+        );
+        Rectangle swordBox = player.getSwordHitbox(); // null se não está atacando
+
+        List<Octorok> octoroksToRemove = new ArrayList<>();
+        for (Octorok octorok : activeOctoroks) {
+            // Colisões sem a hitbox do próprio Octorok, mas COM a hitbox do player
+            // (evita auto-bloqueio E impede o Octorok de andar por cima do player)
+            Rectangle ownHitbox = octorok.isDead() ? null : octorok.getHitbox();
+            List<Rectangle> collisionsForOctorok = new ArrayList<>(activeCollisions);
+            if (ownHitbox != null) {
+                final Rectangle own = ownHitbox;
+                collisionsForOctorok.removeIf(r -> r == own);
+            }
+            // Adiciona hitbox do player para o Octorok evitar atravessá-lo
+            if (!octorok.isDead()) {
+                collisionsForOctorok.add(player.getHitbox());
+            }
+            octorok.update(delta, collisionsForOctorok, player.getPosition());
+
+            // Push-out: se o Octorok ainda sobrepõe o player após o update, empurra o player para fora
+            if (!octorok.isDead() && player.getHitbox().overlaps(octorok.getHitbox())) {
+                Rectangle ph = player.getHitbox();
+                Rectangle oh = octorok.getHitbox();
+                // Calcula a menor sobreposição e empurra o player para fora
+                float overlapLeft   = (ph.x + ph.width)  - oh.x;
+                float overlapRight  = (oh.x + oh.width)  - ph.x;
+                float overlapBottom = (ph.y + ph.height) - oh.y;
+                float overlapTop    = (oh.y + oh.height) - ph.y;
+                float minX = overlapLeft < overlapRight  ? -overlapLeft  : overlapRight;
+                float minY = overlapBottom < overlapTop  ? -overlapBottom : overlapTop;
+                Vector2 pos = player.getPosition();
+                if (Math.abs(minX) < Math.abs(minY)) {
+                    player.setPosition(pos.x + minX, pos.y);
+                } else {
+                    player.setPosition(pos.x, pos.y + minY);
+                }
+            }
+
+            // Dano dos dardos ao player
+            for (var dart : octorok.getDarts()) {
+                if (dart.isActive() && playerDamageBox.overlaps(dart.getHitbox())) {
+                    player.takeDamage(octorok.getHitDamageHP());
+                    dart.deactivate();
+                }
+            }
+
+            // Dano da espada do player ao Octorok (1 HP = meio coração)
+            if (swordBox != null && !octorok.isDead()
+                    && swordBox.overlaps(octorok.getHitbox())) {
+                octorok.takeDamage(1);
+            }
+
+            // Remove Octorok após explosão terminar
+            if (octorok.isExplosionFinished()) {
+                octoroksToRemove.add(octorok);
+            }
+        }
+        for (Octorok dead : octoroksToRemove) {
+            quadrantManager.removeOctorok(dead);
+        }
     }
     
     private void processItems(float delta) {
@@ -178,6 +256,7 @@ public class GameScreen implements Screen {
 
     private void draw() {
         // Obter os itens ativos para desenhar
+        List<Octorok> activeOctoroks = quadrantManager.getActiveOctoroks(player.getPosition());
         List<Item> activeItems = quadrantManager.getActiveItems(player.getPosition());
         List<HostNPC> activeNpcs = quadrantManager.getActiveHostNpcs(player.getPosition());
         List<Fire> activeFires = quadrantManager.getActiveFires(player.getPosition());
@@ -199,6 +278,9 @@ public class GameScreen implements Screen {
         for (Fire fire : activeFires) {
             fire.render(batch);
         }
+        for (Octorok octorok : activeOctoroks) {
+            octorok.render(batch);
+        }
         player.render(batch);
         
         // Desenha as coordenadas do player
@@ -209,6 +291,15 @@ public class GameScreen implements Screen {
 
         // Desenhar os Hitboxes para debug visual
         shapeRenderer.setProjectionMatrix(cameraManager.getCamera().combined);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+
+        // Renderiza explosões dos Octoroks (partículas)
+        for (Octorok octorok : activeOctoroks) {
+            octorok.renderExplosion(shapeRenderer);
+        }
+
+        shapeRenderer.end();
+
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
 
         // Desenha as colisões ativas em Vermelho
@@ -261,6 +352,9 @@ public class GameScreen implements Screen {
         }
         if (npcSpriteSheet != null) {
             npcSpriteSheet.dispose();
+        }
+        if (enemiesSpriteSheet != null) {
+            enemiesSpriteSheet.dispose();
         }
         if (map != null) {
             map.dispose();

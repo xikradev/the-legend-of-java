@@ -203,6 +203,30 @@ public class Player {
         return new Rectangle(position.x + 2, position.y, 12, 8);
     }
 
+    /**
+     * Retorna o hitbox ativo da espada durante o ataque, ou null se não está atacando.
+     * O hitbox é projetado à frente do player na direção do ataque.
+     */
+    public Rectangle getSwordHitbox() {
+        if (!isAttacking()) return null;
+        float cx = position.x + 8; // centro horizontal do player
+        float cy = position.y + 8; // centro vertical do player
+        float reach = 18f;         // alcance da espada em pixels
+        float half  = 8f;          // metade da largura da área de acerto
+        switch (currentState) {
+            case ATTACKING_UP:
+                return new Rectangle(cx - half, cy + 2f, half * 2, reach);
+            case ATTACKING_DOWN:
+                return new Rectangle(cx - half, cy - reach - 2f, half * 2, reach);
+            case ATTACKING_RIGHT:
+                return new Rectangle(cx + 2f, cy - half, reach, half * 2);
+            case ATTACKING_LEFT:
+                return new Rectangle(cx - reach - 2f, cy - half, reach, half * 2);
+            default:
+                return null;
+        }
+    }
+
     private boolean collides(List<Rectangle> collisionRects) {
         Rectangle playerRect = getHitbox();
         for (Rectangle rect : collisionRects) {
