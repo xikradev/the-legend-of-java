@@ -19,6 +19,7 @@ import com.legendofjava.core.entities.Item;
 import com.legendofjava.core.entities.Player;
 import com.legendofjava.core.entities.HostNPC;
 import com.legendofjava.core.entities.Fire;
+import com.legendofjava.core.entities.HeartItem;
 import com.legendofjava.core.entities.Octorok;
 import com.legendofjava.core.managers.CameraManager;
 import com.legendofjava.core.managers.HudRenderer;
@@ -49,6 +50,11 @@ public class GameScreen implements Screen {
     private Texture spriteSheet;
     private Texture npcSpriteSheet;
     private Texture enemiesSpriteSheet;
+    private Texture itemsSpriteSheet;
+
+    /** Contador global de Octoroks mortos — a cada 3 mortes dropa um coração. */
+    private int octorokKillCount = 0;
+    private static final int KILLS_PER_HEART_DROP = 3;
 
     private Music overworldTheme;
     private Sound receiveItemSound;
@@ -84,6 +90,7 @@ public class GameScreen implements Screen {
         spriteSheet        = new Texture("sprites/link-spritesheet.png");
         npcSpriteSheet     = new Texture("sprites/npc-spritesheet.png");
         enemiesSpriteSheet = new Texture("sprites/enemies-spritesheet.png");
+        itemsSpriteSheet   = new Texture("sprites/items-zelda.png");
     }
     
     private void initManagers() {
@@ -225,6 +232,17 @@ public class GameScreen implements Screen {
         }
         for (Octorok dead : octoroksToRemove) {
             quadrantManager.removeOctorok(dead);
+
+            // Contabiliza a morte e verifica se deve dropar coração
+            octorokKillCount++;
+            if (octorokKillCount % KILLS_PER_HEART_DROP == 0) {
+                HeartItem heart = new HeartItem(
+                    dead.getPosition().x,
+                    dead.getPosition().y,
+                    itemsSpriteSheet
+                );
+                quadrantManager.addItem(heart);
+            }
         }
     }
     
@@ -241,7 +259,10 @@ public class GameScreen implements Screen {
                     itemsToRemove.add(item);
                     
                     // Sinaliza para o warpManager que pegou item e pode limpar a caverna
-                    warpManager.markCaveCleared();
+                    // (apenas para itens de caverna, não para corações droppados por inimigos)
+                    if (!(item instanceof HeartItem)) {
+                        warpManager.markCaveCleared();
+                    }
                 }
             }
         }
@@ -355,6 +376,9 @@ public class GameScreen implements Screen {
         }
         if (enemiesSpriteSheet != null) {
             enemiesSpriteSheet.dispose();
+        }
+        if (itemsSpriteSheet != null) {
+            itemsSpriteSheet.dispose();
         }
         if (map != null) {
             map.dispose();

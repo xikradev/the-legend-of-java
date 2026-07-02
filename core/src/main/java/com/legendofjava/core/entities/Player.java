@@ -386,6 +386,11 @@ public class Player {
         return health <= 0;
     }
 
+    /** Define a vida do player diretamente (usado por itens de cura). */
+    public void setHealth(int health) {
+        this.health = Math.max(0, Math.min(maxHealth, health));
+    }
+
     // -------- Posição --------
 
     public Vector2 getPosition() {
