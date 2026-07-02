@@ -22,6 +22,7 @@ import com.legendofjava.core.entities.Fire;
 import com.legendofjava.core.entities.HeartItem;
 import com.legendofjava.core.entities.Octorok;
 import com.legendofjava.core.managers.CameraManager;
+import com.legendofjava.core.managers.GameOverOverlay;
 import com.legendofjava.core.managers.HudRenderer;
 import com.legendofjava.core.world.QuadrantManager;
 import com.legendofjava.core.world.WarpManager;
@@ -46,6 +47,7 @@ public class GameScreen implements Screen {
     private ShapeRenderer shapeRenderer;
     private BitmapFont font;
     private HudRenderer hudRenderer;
+    private GameOverOverlay gameOverOverlay;
 
     private Texture spriteSheet;
     private Texture npcSpriteSheet;
@@ -73,6 +75,7 @@ public class GameScreen implements Screen {
         font = new BitmapFont();
         font.getData().setScale(0.5f);
         hudRenderer = new HudRenderer();
+        gameOverOverlay = new GameOverOverlay();
     }
 
     private void initAudio() {
@@ -117,6 +120,26 @@ public class GameScreen implements Screen {
     }
     
     private void update(float delta) {
+        // Se o overlay estiver visível, só atualiza ele (jogo pausado)
+        if (gameOverOverlay.isVisible()) {
+            gameOverOverlay.update();
+            return;
+        }
+
+        // Detecta morte do player
+        if (player.isDead()) {
+            overworldTheme.stop();
+            gameOverOverlay.show(GameOverOverlay.Type.GAME_OVER, this::restartGame);
+            return;
+        }
+
+        // Detecta chegada na zona de fim de jogo
+        if (warpManager.isInEndZone(player.getHitbox())) {
+            overworldTheme.stop();
+            gameOverOverlay.show(GameOverOverlay.Type.GAME_CLEAR, this::restartGame);
+            return;
+        }
+
         // Obter as colisões do quadrante atual e adjacentes
         List<Rectangle> activeCollisions = quadrantManager.getActiveCollisions(player.getPosition());
 
@@ -336,14 +359,18 @@ public class GameScreen implements Screen {
 
         shapeRenderer.end();
 
-        // ── HUD (sempre por cima do mundo) ──────────────────────────────────
+        // ── HUD (sempre por cima do mundo) ──────────────────────────────────────
         hudRenderer.render(player);
+
+        // ── Game Over / Game Clear overlay ───────────────────────────────
+        gameOverOverlay.render();
     }
 
     @Override
     public void resize(int width, int height) {
         cameraManager.resize(width, height);
         hudRenderer.resize(width, height);
+        gameOverOverlay.resize(width, height);
     }
 
     @Override
@@ -395,11 +422,23 @@ public class GameScreen implements Screen {
         if (hudRenderer != null) {
             hudRenderer.dispose();
         }
+        if (gameOverOverlay != null) {
+            gameOverOverlay.dispose();
+        }
         if (overworldTheme != null) {
             overworldTheme.dispose();
         }
         if (receiveItemSound != null) {
             receiveItemSound.dispose();
         }
+    }
+
+    /** Reinicia o jogo substituindo a screen atual por uma nova instância.
+     *  O dispose() é agendado via postRunnable para não destruir recursos OpenGL
+     *  nativos no meio de um frame de render (causaria corrupção de memória). */
+    private void restartGame() {
+        final GameScreen self = this;
+        game.setScreen(new GameScreen(game));
+        Gdx.app.postRunnable(self::dispose);
     }
 }

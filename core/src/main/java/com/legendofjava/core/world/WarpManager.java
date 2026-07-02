@@ -22,6 +22,7 @@ public class WarpManager {
     private Map<String, Boolean> clearedCaves = new HashMap<>();
     private List<RectangleMapObject> warps = new ArrayList<>();
     private List<RectangleMapObject> caveExits = new ArrayList<>();
+    private Rectangle endGameZone = null;
     private Map<String, Vector2> itemSpawns = new HashMap<>();
     private Texture spriteSheet;
 
@@ -41,6 +42,8 @@ public class WarpManager {
                         warps.add(rectObj);
                     } else if ("cave_exit".equals(type)) {
                         caveExits.add(rectObj);
+                    } else if ("end-game".equals(type)) {
+                        endGameZone = rectObj.getRectangle();
                     }
                 }
             }
@@ -111,5 +114,12 @@ public class WarpManager {
         if (currentCaveId != null) {
             clearedCaves.put(currentCaveId, true);
         }
+    }
+
+    /**
+     * Retorna true se o hitbox do player sobrepõe a zona de fim de jogo.
+     */
+    public boolean isInEndZone(Rectangle playerHitbox) {
+        return endGameZone != null && playerHitbox.overlaps(endGameZone);
     }
 }
