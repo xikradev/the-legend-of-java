@@ -38,6 +38,10 @@ public class QuadrantManager {
                 if (object instanceof RectangleMapObject) {
                     Rectangle r = ((RectangleMapObject) object).getRectangle();
 
+                    // Verifica se o objeto tem a propriedade color=green
+                    String colorProp = (String) object.getProperties().get("color");
+                    boolean isGreen = "green".equalsIgnoreCase(colorProp);
+
                     int minCol = getCol(r.x);
                     int maxCol = getCol(r.x + r.width);
 
@@ -49,6 +53,9 @@ public class QuadrantManager {
                     for (int col = minCol; col <= maxCol; col++) {
                         for (int row = minRow; row <= maxRow; row++) {
                             Quadrant q = getOrCreateQuadrant(col, row);
+                            if (isGreen) {
+                                q.addGreenCollision(r);
+                            }
                             q.addCollision(r);
                         }
                     }
@@ -173,6 +180,26 @@ public class QuadrantManager {
                 String key = (centerCol + i) + "_" + (centerRow + j);
                 if (quadrants.containsKey(key)) {
                     for (Rectangle r : quadrants.get(key).getCollisions()) {
+                        if (!active.contains(r)) {
+                            active.add(r);
+                        }
+                    }
+                }
+            }
+        }
+        return active;
+    }
+
+    public List<Rectangle> getActiveGreenCollisions(Vector2 playerPosition) {
+        List<Rectangle> active = new ArrayList<>();
+        int centerCol = getCol(playerPosition.x);
+        int centerRow = getRow(playerPosition.y);
+
+        for (int i = -1; i <= 1; i++) {
+            for (int j = -1; j <= 1; j++) {
+                String key = (centerCol + i) + "_" + (centerRow + j);
+                if (quadrants.containsKey(key)) {
+                    for (Rectangle r : quadrants.get(key).getGreenCollisions()) {
                         if (!active.contains(r)) {
                             active.add(r);
                         }

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2-2-geb83ddb9" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="200" tileheight="200" infinite="0" nextlayerid="10" nextobjectid="281">
+<map version="1.10" tiledversion="1.12.2-2-geb83ddb9" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="200" tileheight="200" infinite="0" nextlayerid="10" nextobjectid="319">
  <tileset firstgid="1" source="NES - The Legend of Zelda - Tilesets - Overworld Tileset.tsx"/>
  <layer id="1" name="Camada de Blocos 1" width="30" height="20">
   <data encoding="csv">
@@ -28,14 +28,18 @@
  <imagelayer id="2" name="mapa">
   <image source="zelda-overworld.png" width="4113" height="1598"/>
  </imagelayer>
- <objectgroup id="3" name="colisoes" visible="0">
+ <objectgroup id="3" name="colisoes">
   <object id="58" type="colision" x="1880.33" y="1240.67" width="31" height="29.6667"/>
   <object id="60" type="colision" x="1944.36" y="1254.73" width="18.1818" height="64.5455"/>
   <object id="61" type="colision" x="1962.73" y="1303.09" width="92.6667" height="16.9091"/>
   <object id="63" type="colision" x="2024.36" y="1336.3" width="11.4545" height="50.8485"/>
   <object id="64" type="colision" x="1829.05" y="1384.73" width="206.591" height="9.81818"/>
   <object id="65" type="colision" x="1797.5" y="1337.25" width="33.25" height="49.5"/>
-  <object id="68" type="colision" x="1787.66" y="1313.33" width="12.25" height="25.6667"/>
+  <object id="68" type="colision" x="1790.16" y="1315.33" width="12.25" height="25.6667">
+   <properties>
+    <property name="color" value="green"/>
+   </properties>
+  </object>
   <object id="69" type="colision" x="1799.75" y="1279.75" width="23.25" height="38.75"/>
   <object id="70" type="colision" x="1822" y="1262.25" width="8.5" height="48"/>
   <object id="71" type="colision" x="1830.5" y="1254" width="9.75" height="47"/>
@@ -89,7 +93,11 @@
   <object id="139" type="colision" x="1879.5" y="1144" width="15" height="14.75"/>
   <object id="140" type="colision" x="1848.25" y="1113.25" width="14.5" height="13"/>
   <object id="142" type="colision" x="1880.25" y="1112.25" width="16.25" height="15.5"/>
-  <object id="143" type="colision" x="1786.33" y="1094.75" width="16.25" height="106"/>
+  <object id="143" type="colision" x="1786.33" y="1094.75" width="16.25" height="106">
+   <properties>
+    <property name="color" value="green"/>
+   </properties>
+  </object>
   <object id="144" type="colision" x="1800.5" y="1094.25" width="12" height="29.5"/>
   <object id="145" type="colision" x="1813.75" y="1084.75" width="10.5" height="24.75"/>
   <object id="146" type="colision" x="1823.5" y="1077.5" width="9" height="24.25"/>
@@ -143,9 +151,17 @@
   <object id="204" type="colision" x="2393.5" y="1111.5" width="17" height="15.5"/>
   <object id="205" type="colision" x="2394.5" y="1144.5" width="15.5" height="13.5"/>
   <object id="206" type="colision" x="2395.5" y="1174.5" width="14.5" height="17"/>
-  <object id="207" type="colision" x="2423.5" y="1054.5" width="37" height="17.5"/>
+  <object id="207" type="colision" x="2423.5" y="1054.5" width="37" height="17.5">
+   <properties>
+    <property name="color" value="green"/>
+   </properties>
+  </object>
   <object id="208" type="colision" x="2457.33" y="1062.67" width="224" height="78.6667"/>
-  <object id="209" type="colision" x="2681" y="1053.5" width="67.5" height="18.5"/>
+  <object id="209" type="colision" x="2681" y="1053.5" width="67.5" height="18.5">
+   <properties>
+    <property name="color" value="green"/>
+   </properties>
+  </object>
   <object id="210" type="colision" x="2747" y="1030" width="48" height="64.5"/>
   <object id="211" type="colision" x="2812" y="1031" width="32" height="64.5"/>
   <object id="212" type="colision" x="2860.5" y="1032" width="16.5" height="62.5"/>
@@ -163,7 +179,6 @@
   <object id="224" type="colision" x="2987.5" y="1112" width="16" height="15"/>
   <object id="225" type="colision" x="2988" y="1143.5" width="15" height="16"/>
   <object id="226" type="colision" x="2987" y="1175.5" width="16" height="15"/>
-  <object id="228" type="colision" x="2796" y="1053" width="242" height="23"/>
   <object id="230" type="colision" x="3036" y="1079.5" width="109.5" height="15"/>
   <object id="231" type="colision" x="3052.5" y="1095" width="93.5" height="13"/>
   <object id="232" type="colision" x="3067" y="1108.5" width="82" height="16.5"/>
@@ -173,25 +188,53 @@
   <object id="236" type="colision" x="3166" y="1062" width="15" height="110"/>
   <object id="237" type="colision" x="3039" y="1061.5" width="108" height="17.5"/>
   <object id="238" type="colision" x="3037" y="1031" width="108" height="30"/>
-  <object id="239" type="colision" x="2989" y="905" width="19" height="124.5"/>
+  <object id="239" type="colision" x="2825" y="887" width="19" height="148.5">
+   <properties>
+    <property name="color" value="green"/>
+   </properties>
+  </object>
   <object id="240" type="colision" x="2987" y="885.5" width="32.5" height="32.5"/>
-  <object id="241" type="colision" x="3013" y="875" width="45.5" height="20.5"/>
+  <object id="241" type="colision" x="3013" y="875" width="45.5" height="20.5">
+   <properties>
+    <property name="color" value="green"/>
+   </properties>
+  </object>
   <object id="242" type="colision" x="3053" y="884.5" width="154.5" height="32.5"/>
   <object id="243" type="colision" x="3067" y="937" width="102" height="75"/>
   <object id="244" type="colision" x="3165.5" y="937.5" width="109.5" height="123.5"/>
   <object id="245" type="colision" x="3206.5" y="883" width="132" height="33.5"/>
   <object id="246" type="colision" x="3294.5" y="999.5" width="94" height="61.5"/>
-  <object id="247" type="colision" x="3262.5" y="1047" width="39" height="13.5"/>
-  <object id="248" type="colision" x="3374" y="1042.5" width="48" height="18"/>
+  <object id="247" type="colision" x="3262.5" y="1047" width="39" height="13.5">
+   <properties>
+    <property name="color" value="green"/>
+   </properties>
+  </object>
+  <object id="248" type="colision" x="3374" y="1042.5" width="48" height="18">
+   <properties>
+    <property name="color" value="green"/>
+   </properties>
+  </object>
   <object id="249" type="colision" x="3407.5" y="1001" width="127.5" height="60"/>
   <object id="250" type="colision" x="3293.5" y="917" width="94.5" height="32"/>
   <object id="251" type="colision" x="3340.5" y="884" width="47.5" height="32"/>
   <object id="252" type="colision" x="3407" y="888" width="124.5" height="59.5"/>
-  <object id="253" type="colision" x="3386" y="884.5" width="21.5" height="19.5"/>
-  <object id="254" type="colision" x="3530.5" y="888.5" width="21.5" height="16.5"/>
+  <object id="253" type="colision" x="3386" y="884.5" width="21.5" height="19.5">
+   <properties>
+    <property name="color" value="green"/>
+   </properties>
+  </object>
+  <object id="254" type="colision" x="3530.5" y="888.5" width="21.5" height="16.5">
+   <properties>
+    <property name="color" value="green"/>
+   </properties>
+  </object>
   <object id="255" type="colision" x="3554.5" y="888" width="44.5" height="61.5"/>
   <object id="256" type="colision" x="3549.5" y="997.5" width="49.5" height="64.5"/>
-  <object id="257" type="colision" x="3516.5" y="1040.5" width="45" height="21.5"/>
+  <object id="257" type="colision" x="3516.5" y="1040.5" width="45" height="21.5">
+   <properties>
+    <property name="color" value="green"/>
+   </properties>
+  </object>
   <object id="258" type="colision" x="3597" y="882.5" width="16.5" height="63.5"/>
   <object id="259" type="colision" x="3615" y="884.5" width="13.5" height="46"/>
   <object id="260" type="colision" x="3629.5" y="883.5" width="58" height="29.5"/>
@@ -213,6 +256,38 @@
   <object id="277" type="colision" x="3790.5" y="984" width="16" height="13.5"/>
   <object id="278" type="colision" x="3662.5" y="952.5" width="15" height="13"/>
   <object id="279" type="colision" x="3663.5" y="982" width="16" height="16"/>
+  <object id="281" type="colision" x="2860" y="887.5" width="16.5" height="30"/>
+  <object id="282" type="colision" x="2861" y="953" width="14" height="13.5"/>
+  <object id="283" type="colision" x="2859.5" y="982" width="18" height="16.5"/>
+  <object id="284" type="colision" x="2924.5" y="951.5" width="16" height="14.5"/>
+  <object id="285" type="colision" x="2957" y="952" width="14" height="13"/>
+  <object id="286" type="colision" x="2924.5" y="982" width="16" height="16"/>
+  <object id="287" type="colision" x="2957.5" y="983" width="15" height="14"/>
+  <object id="288" type="colision" x="2988" y="935" width="15.5" height="15.5"/>
+  <object id="289" type="colision" x="2989" y="967" width="17" height="15"/>
+  <object id="290" type="colision" x="2988.5" y="999.5" width="16.5" height="14.5"/>
+  <object id="291" type="colision" x="2924" y="886.5" width="15" height="29.5"/>
+  <object id="292" type="colision" x="2958" y="887" width="15.5" height="31"/>
+  <object id="293" type="colision" x="2826" y="872.5" width="165.5" height="25">
+   <properties>
+    <property name="color" value="green"/>
+   </properties>
+  </object>
+  <object id="295" type="colision" x="2789.5" y="1049.5" width="26" height="19">
+   <properties>
+    <property name="color" value="green"/>
+   </properties>
+  </object>
+  <object id="300" type="colision" x="2097.5" y="1058" width="210" height="16">
+   <properties>
+    <property name="color" value="green"/>
+   </properties>
+  </object>
+  <object id="318" type="colision" x="2310.17" y="1240.83" width="15.6667" height="146.333">
+   <properties>
+    <property name="color" value="green"/>
+   </properties>
+  </object>
  </objectgroup>
  <objectgroup id="5" name="warps">
   <object id="79" type="warp" x="1863.64" y="1256.42" width="16.1212" height="15.5455">
@@ -268,6 +343,111 @@
    </properties>
   </object>
   <object id="168" type="octorok" x="1823.58" y="1171.77" width="9.5" height="9.13636">
+   <properties>
+    <property name="hit" type="float" value="0.5"/>
+   </properties>
+  </object>
+  <object id="296" type="octorok" x="2179.25" y="1077.43" width="9.5" height="9.13636">
+   <properties>
+    <property name="hit" type="float" value="0.5"/>
+   </properties>
+  </object>
+  <object id="297" type="octorok" x="2239.25" y="1179.43" width="9.5" height="9.13636">
+   <properties>
+    <property name="hit" type="float" value="0.5"/>
+   </properties>
+  </object>
+  <object id="298" type="octorok" x="2096.75" y="1184.43" width="9.5" height="9.13636">
+   <properties>
+    <property name="hit" type="float" value="0.5"/>
+   </properties>
+  </object>
+  <object id="299" type="octorok" x="2236.75" y="1107.43" width="9.5" height="9.13636">
+   <properties>
+    <property name="hit" type="float" value="0.5"/>
+   </properties>
+  </object>
+  <object id="301" type="octorok" x="2373.75" y="1107.43" width="9.5" height="9.13636">
+   <properties>
+    <property name="hit" type="float" value="0.5"/>
+   </properties>
+  </object>
+  <object id="302" type="octorok" x="2482.25" y="1174.43" width="9.5" height="9.13636">
+   <properties>
+    <property name="hit" type="float" value="0.5"/>
+   </properties>
+  </object>
+  <object id="303" type="octorok" x="2660.75" y="1170.43" width="9.5" height="9.13636">
+   <properties>
+    <property name="hit" type="float" value="0.5"/>
+   </properties>
+  </object>
+  <object id="304" type="octorok" x="2712.75" y="1093.93" width="9.5" height="9.13636">
+   <properties>
+    <property name="hit" type="float" value="0.5"/>
+   </properties>
+  </object>
+  <object id="305" type="octorok" x="2794.75" y="1188.43" width="9.5" height="9.13636">
+   <properties>
+    <property name="hit" type="float" value="0.5"/>
+   </properties>
+  </object>
+  <object id="306" type="octorok" x="2895.25" y="1075.93" width="9.5" height="9.13636">
+   <properties>
+    <property name="hit" type="float" value="0.5"/>
+   </properties>
+  </object>
+  <object id="307" type="octorok" x="2953.75" y="1186.43" width="9.5" height="9.13636">
+   <properties>
+    <property name="hit" type="float" value="0.5"/>
+   </properties>
+  </object>
+  <object id="308" type="octorok" x="3031.75" y="1148.93" width="9.5" height="9.13636">
+   <properties>
+    <property name="hit" type="float" value="0.5"/>
+   </properties>
+  </object>
+  <object id="309" type="octorok" x="3152.25" y="1091.43" width="9.5" height="9.13636">
+   <properties>
+    <property name="hit" type="float" value="0.5"/>
+   </properties>
+  </object>
+  <object id="310" type="octorok" x="3034.75" y="943.432" width="9.5" height="9.13636">
+   <properties>
+    <property name="hit" type="float" value="0.5"/>
+   </properties>
+  </object>
+  <object id="311" type="octorok" x="2892.75" y="983.932" width="9.5" height="9.13636">
+   <properties>
+    <property name="hit" type="float" value="0.5"/>
+   </properties>
+  </object>
+  <object id="312" type="octorok" x="2897.25" y="913.932" width="9.5" height="9.13636">
+   <properties>
+    <property name="hit" type="float" value="0.5"/>
+   </properties>
+  </object>
+  <object id="313" type="octorok" x="3218.25" y="923.932" width="9.5" height="9.13636">
+   <properties>
+    <property name="hit" type="float" value="0.5"/>
+   </properties>
+  </object>
+  <object id="314" type="octorok" x="3395.75" y="920.932" width="9.5" height="9.13636">
+   <properties>
+    <property name="hit" type="float" value="0.5"/>
+   </properties>
+  </object>
+  <object id="315" type="octorok" x="3538.75" y="922.932" width="9.5" height="9.13636">
+   <properties>
+    <property name="hit" type="float" value="0.5"/>
+   </properties>
+  </object>
+  <object id="316" type="octorok" x="3537.75" y="1021.93" width="9.5" height="9.13636">
+   <properties>
+    <property name="hit" type="float" value="0.5"/>
+   </properties>
+  </object>
+  <object id="317" type="octorok" x="3393.75" y="1024.93" width="9.5" height="9.13636">
    <properties>
     <property name="hit" type="float" value="0.5"/>
    </properties>

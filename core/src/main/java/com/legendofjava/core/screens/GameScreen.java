@@ -215,25 +215,6 @@ public class GameScreen implements Screen {
             }
             octorok.update(delta, collisionsForOctorok, player.getPosition());
 
-            // Push-out: se o Octorok ainda sobrepõe o player após o update, empurra o player para fora
-            if (!octorok.isDead() && player.getHitbox().overlaps(octorok.getHitbox())) {
-                Rectangle ph = player.getHitbox();
-                Rectangle oh = octorok.getHitbox();
-                // Calcula a menor sobreposição e empurra o player para fora
-                float overlapLeft   = (ph.x + ph.width)  - oh.x;
-                float overlapRight  = (oh.x + oh.width)  - ph.x;
-                float overlapBottom = (ph.y + ph.height) - oh.y;
-                float overlapTop    = (oh.y + oh.height) - ph.y;
-                float minX = overlapLeft < overlapRight  ? -overlapLeft  : overlapRight;
-                float minY = overlapBottom < overlapTop  ? -overlapBottom : overlapTop;
-                Vector2 pos = player.getPosition();
-                if (Math.abs(minX) < Math.abs(minY)) {
-                    player.setPosition(pos.x + minX, pos.y);
-                } else {
-                    player.setPosition(pos.x, pos.y + minY);
-                }
-            }
-
             // Dano dos dardos ao player
             for (var dart : octorok.getDarts()) {
                 if (dart.isActive() && playerDamageBox.overlaps(dart.getHitbox())) {
@@ -304,8 +285,8 @@ public class GameScreen implements Screen {
         List<Item> activeItems = quadrantManager.getActiveItems(player.getPosition());
         List<HostNPC> activeNpcs = quadrantManager.getActiveHostNpcs(player.getPosition());
         List<Fire> activeFires = quadrantManager.getActiveFires(player.getPosition());
-        List<Rectangle> activeCollisions = quadrantManager.getActiveCollisions(player.getPosition());
-        
+        List<Rectangle> activeGreenCollisions = quadrantManager.getActiveGreenCollisions(player.getPosition());
+
         mapRenderer.setView(cameraManager.getCamera());
         mapRenderer.render();
 
@@ -342,22 +323,16 @@ public class GameScreen implements Screen {
             octorok.renderExplosion(shapeRenderer);
         }
 
-        shapeRenderer.end();
-
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-
-        // Desenha as colisões ativas em Vermelho
-        shapeRenderer.setColor(Color.RED);
-        for (Rectangle rect : activeCollisions) {
+        // Preenche completamente de verde as colisões com color=green (RGB 0, 168, 0)
+        shapeRenderer.setColor(new Color(0f, 168f / 255f, 0f, 1f));
+        for (Rectangle rect : activeGreenCollisions) {
             shapeRenderer.rect(rect.x, rect.y, rect.width, rect.height);
         }
 
-        // Desenha o hitbox do Player em Azul
-        shapeRenderer.setColor(Color.BLUE);
-        Rectangle pRect = player.getHitbox();
-        shapeRenderer.rect(pRect.x, pRect.y, pRect.width, pRect.height);
-
         shapeRenderer.end();
+
+
+
 
         // ── HUD (sempre por cima do mundo) ──────────────────────────────────────
         hudRenderer.render(player);

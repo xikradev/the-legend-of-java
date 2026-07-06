@@ -14,6 +14,7 @@ public class Quadrant {
     public final int row;
 
     private List<Rectangle> collisions;
+    private List<Rectangle> greenCollisions;
     private List<Item> items;
     private List<HostNPC> hostNpcs;
     private List<Fire> fires;
@@ -23,6 +24,7 @@ public class Quadrant {
         this.col = col;
         this.row = row;
         this.collisions = new ArrayList<>();
+        this.greenCollisions = new ArrayList<>();
         this.items = new ArrayList<>();
         this.hostNpcs = new ArrayList<>();
         this.fires = new ArrayList<>();
@@ -35,6 +37,14 @@ public class Quadrant {
 
     public void addCollision(Rectangle rect) {
         collisions.add(rect);
+    }
+
+    public List<Rectangle> getGreenCollisions() {
+        return greenCollisions;
+    }
+
+    public void addGreenCollision(Rectangle rect) {
+        greenCollisions.add(rect);
     }
 
     public List<Item> getItems() {
